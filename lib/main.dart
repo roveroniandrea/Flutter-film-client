@@ -1,4 +1,7 @@
+import 'package:film_server/models/inspect_film_argument.dart';
 import 'package:film_server/screens/film_list/film_list.dart';
+import 'package:film_server/screens/inspect_film/inspect_film.dart';
+import 'package:film_server/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -27,7 +30,12 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: FilmList(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => FilmList(),
+        InspectFilmArgument.routeName: (context) => InspectFilm(),
+        OptionsScreen.routeName: (context) => OptionsScreen()
+      },
     );
   }
 }

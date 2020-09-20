@@ -1,6 +1,7 @@
 import 'package:film_server/models/film_class.dart';
 import 'package:film_server/models/film_folder_class.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:film_server/models/inspect_film_argument.dart';
+import 'package:film_server/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 
@@ -37,6 +38,10 @@ class _FilmListState extends State<FilmList> {
             IconButton(
               icon: Icon(Icons.refresh),
               onPressed: _loadFilms,
+            ),
+            IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
             )
           ],
         ),
@@ -50,8 +55,9 @@ class _FilmListState extends State<FilmList> {
                     .asMap()
                     .entries
                     .map((entry) => BreadCrumbItem(
-                        content:
-                            Text(entry.value, style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                        content: Text(entry.value,
+                            style: TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.bold)),
                         onTap: () => _handleBreacrumbTap(entry.key)))
                     .toList(),
                 divider: Icon(Icons.chevron_right, color: Colors.orange),
@@ -134,7 +140,9 @@ class _FilmListState extends State<FilmList> {
   }
 
   void _handleFilmTap(FilmClass film) {
-    //TODO:
+    final String fullPath = _path.join('/');
+    Navigator.pushNamed(context, InspectFilmArgument.routeName,
+        arguments: InspectFilmArgument(film: film, fullPath: fullPath));
   }
 
   void _handleFolderTap(FilmFolderClass folder) {
