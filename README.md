@@ -1,6 +1,6 @@
-# film_server
+# Film Client
 
-Film server client with Flutter
+Client application built with Flutter for Film Server repository
 
 ## Getting Started
 

@@ -1,5 +1,6 @@
 import 'package:film_server/models/film_class.dart';
 import 'package:film_server/models/film_folder_class.dart';
+import 'package:film_server/models/film_server.dart';
 import 'package:film_server/models/inspect_film_argument.dart';
 import 'package:film_server/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class FilmList extends StatefulWidget {
 }
 
 class _FilmListState extends State<FilmList> {
-  final FilmFolderClass _films = FilmFolderClass(path: '', folders: [
+  FilmFolderClass _films = FilmFolderClass(path: '', folders: [
     FilmFolderClass(path: 'Star Wars', films: [
       FilmClass(title: 'La minaccia fantasma.mp4'),
       FilmClass(title: 'L attacco dei cloni.m4v')
@@ -41,7 +42,8 @@ class _FilmListState extends State<FilmList> {
             ),
             IconButton(
               icon: Icon(Icons.settings),
-              onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
+              onPressed: () =>
+                  Navigator.pushNamed(context, OptionsScreen.routeName),
             )
           ],
         ),
@@ -107,9 +109,16 @@ class _FilmListState extends State<FilmList> {
   }
 
   void _loadFilms() {
-    //TODO: recuperare da server
     setState(() {
       _path.length = 0;
+    });
+
+    FilmServer.getFilms().then((films) {
+      setState(() {
+        _films = films;
+      });
+    }, onError: (err) {
+      print('Errore: $err');
     });
   }
 
