@@ -1,3 +1,4 @@
+import 'package:film_server/components/custom_progress.dart';
 import 'package:film_server/models/cast_local_argument.dart';
 import 'package:film_server/models/film_class.dart';
 import 'package:film_server/models/inspect_film_argument.dart';
@@ -14,6 +15,7 @@ class _InspectFilmState extends State<InspectFilm> {
   FilmClass _film;
   String _fullPath = '';
   bool _transmittingOnChromecast = false;
+  bool _searchingChromecasts = false;
   BuildContext _scaffoldContext;
 
   @override
@@ -22,10 +24,7 @@ class _InspectFilmState extends State<InspectFilm> {
     Future.delayed(Duration.zero, () {
       setState(() {
         final InspectFilmArgument arg =
-            ModalRoute
-                .of(context)
-                .settings
-                .arguments;
+            ModalRoute.of(context).settings.arguments;
         _film = arg.film;
         _fullPath = arg.fullPath;
       });
@@ -51,59 +50,102 @@ class _InspectFilmState extends State<InspectFilm> {
   Widget _buildBody() {
     final List<Widget> columnChildren = _film != null
         ? [
-      Container(
-        padding: EdgeInsets.all(20.0),
-        child: Text(
-          'Dove vuoi guardare\n"${_film.humanTitle}"?',
-          style: TextStyle(fontSize: 25.0),
-          textAlign: TextAlign.center,
-        ),
-      ),
-      Divider()
-    ]
+            Container(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'Dove vuoi guardare\n"${_film.humanTitle}"?',
+                style: TextStyle(fontSize: 25.0),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Divider()
+          ]
         : [];
     if (_film != null) {
-      columnChildren.addAll(_buildButtons());
+      columnChildren.add(_buildButtons());
     }
     return Column(children: columnChildren);
   }
 
-  List<Widget> _buildButtons() {
-    if (_film.isSupported()) {
-      final List<Widget> castButtons = [
-        Container(
-          padding: EdgeInsets.all(20.0),
-          child: RaisedButton(
-            child: Text('Guarda sul telefono'),
-            onPressed: _handleGuardaSuTelefono,
-          ),
-        ),
-        Divider()
-      ];
-      castButtons.addAll(_buildChromecastButtons());
-      return castButtons;
-    } else {
-      return [
-        Container(
-          padding: EdgeInsets.only(top: 100.0),
-          child: Text(
-            'Impossibile trasmettere il film:\n\n${_film.notSupportedReason()}',
-            style: TextStyle(
-                color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        )
-      ];
-    }
+  Widget _buildButtons() {
+    final List<Widget> castLocal = _film.isSupported()
+        ? [
+            Container(
+              padding: EdgeInsets.all(20.0),
+              child: RaisedButton(
+                child: Text('Guarda sul telefono'),
+                onPressed: _handleGuardaSuTelefono,
+              ),
+            ),
+            Divider()
+          ]
+        : [];
+
+    return Column(
+        children: castLocal +
+            [
+              CustomProgress(
+                isLoading: _transmittingOnChromecast || _searchingChromecasts,
+                loadingText: _transmittingOnChromecast
+                    ? 'Trasmissione in corso...'
+                    : 'Recupero i Chromecast...',
+                hasError: !_film.isSupported(),
+                child: Column(children: [
+                  Column(
+                    children: [
+                      Container(
+                          padding: EdgeInsets.all(20.0),
+                          child: ButtonBar(
+                            alignment: MainAxisAlignment.spaceAround,
+                            children: _chromecasts
+                                .map(
+                                  (chromecast) => RaisedButton(
+                                    child: Text(chromecast),
+                                    onPressed: () => _handleCast(chromecast),
+                                  ),
+                                )
+                                .toList(),
+                          )),
+                      Container(
+                        padding: EdgeInsets.all(20.0),
+                        child: Text(
+                          'Non vedi il Chromecast?',
+                          style: TextStyle(fontSize: 20.0),
+                        ),
+                      ),
+                      RaisedButton(
+                        child: Text(
+                          'Trova dispositivi',
+                        ),
+                        onPressed: () => _loadChomecasts(),
+                      )
+                    ],
+                  ),
+                ]),
+                errorChild: Container(
+                  padding: EdgeInsets.only(top: 100.0),
+                  child: Text(
+                    'Impossibile trasmettere il film:\n\n${_film.notSupportedReason()}',
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            ]);
   }
 
   void _loadChomecasts() {
     // TODO:
     setState(() {
+      _searchingChromecasts = true;
       _chromecasts.length = 0;
     });
     Future.delayed(Duration(seconds: 1), () {
       setState(() {
+        _searchingChromecasts = false;
         _chromecasts.add('Soggiorno');
         _chromecasts.add('Camera');
       });
@@ -135,61 +177,5 @@ class _InspectFilmState extends State<InspectFilm> {
           ),
           duration: Duration(seconds: 3)));
     });
-  }
-
-  List<Widget> _buildChromecastButtons() {
-    return _chromecasts.length > 0 && !_transmittingOnChromecast
-        ? [
-      Container(
-          padding: EdgeInsets.all(20.0),
-          child: ButtonBar(
-            alignment: MainAxisAlignment.spaceAround,
-            children: _chromecasts
-                .map(
-                  (chromecast) =>
-                  RaisedButton(
-                    child: Text(chromecast),
-                    onPressed: () => _handleCast(chromecast),
-                  ),
-            )
-                .toList(),
-          )),
-      Container(
-        padding: EdgeInsets.all(20.0),
-        child: Text(
-          'Non vedi il chromecast?',
-          style: TextStyle(fontSize: 20.0),
-        ),
-      ),
-      RaisedButton(
-        child: Text(
-          'Trova dispositivi',
-        ),
-        onPressed: () => _loadChomecasts(),
-      )
-    ]
-        : [
-      Container(
-          child: Column(
-            children: [
-              Container(
-                child: Text(
-                    _transmittingOnChromecast
-                        ? 'Trasmissione in corso...'
-                        : 'Recupero i chromecast...',
-                    style: TextStyle(fontSize: 20.0)),
-                padding: EdgeInsets.all(30.0),
-              ),
-              SizedBox(
-                child: CircularProgressIndicator(
-                  value: null,
-                  strokeWidth: 7.0,
-                ),
-                height: 100.0,
-                width: 100.0,
-              ),
-            ],
-          )),
-    ];
   }
 }

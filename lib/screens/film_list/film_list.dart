@@ -1,3 +1,4 @@
+import 'package:film_server/components/custom_progress.dart';
 import 'package:film_server/models/film_class.dart';
 import 'package:film_server/models/film_folder_class.dart';
 import 'package:film_server/models/film_server.dart';
@@ -23,6 +24,8 @@ class _FilmListState extends State<FilmList> {
 
   final List<String> _path = [];
 
+  bool _loadingFilms = false;
+
   @override
   void initState() {
     super.initState();
@@ -33,44 +36,25 @@ class _FilmListState extends State<FilmList> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('Lista dei film'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.refresh),
-              onPressed: _loadFilms,
-            ),
-            IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () =>
-                  Navigator.pushNamed(context, OptionsScreen.routeName),
-            )
-          ],
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(20.0),
-              child: BreadCrumb(
-                items: (['Film'] + _path)
-                    .asMap()
-                    .entries
-                    .map((entry) => BreadCrumbItem(
-                        content: Text(entry.value,
-                            style: TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.bold)),
-                        onTap: () => _handleBreacrumbTap(entry.key)))
-                    .toList(),
-                divider: Icon(Icons.chevron_right, color: Colors.orange),
-                overflow: WrapOverflow(
-                    direction: Axis.horizontal, keepLastDivider: false),
+          appBar: AppBar(
+            title: Text('Lista dei film'),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: _loadFilms,
               ),
-            ),
-            _buildFilmList()
-          ],
-        ),
-      ),
+              IconButton(
+                icon: Icon(Icons.settings),
+                onPressed: () =>
+                    Navigator.pushNamed(context, OptionsScreen.routeName),
+              )
+            ],
+          ),
+          body: CustomProgress(
+              hasError: false,
+              loadingText: 'Recupero i film...',
+              isLoading: _loadingFilms,
+              child: _buildFilmList())),
       onWillPop: _onBackPressed,
     );
   }
@@ -84,40 +68,69 @@ class _FilmListState extends State<FilmList> {
                   .firstWhere((folder) => folder.path == p, orElse: () => null)
             }
         });
-    return ListView(
-      padding: EdgeInsets.all(16.0),
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      children: (subtree.folders.map<Widget>((folder) {
-                return ListTile(
-                  title: Text(folder.path),
-                  leading: Icon(Icons.folder),
-                  onTap: () => _handleFolderTap(folder),
-                );
-              }).toList() +
-              subtree.films.map<Widget>((film) {
-                return ListTile(
-                  title: Text(film.title),
-                  leading: Icon(Icons.movie,
-                      color: film.isSupported() ? Colors.green : Colors.red),
-                  onTap: () => _handleFilmTap(film),
-                );
-              }).toList())
-          .expand((element) => [element, Divider()])
-          .toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: EdgeInsets.all(20.0),
+          child: BreadCrumb(
+            items: (['Film'] + _path)
+                .asMap()
+                .entries
+                .map((entry) => BreadCrumbItem(
+                    content: Text(entry.value,
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold)),
+                    onTap: () => _handleBreacrumbTap(entry.key)))
+                .toList(),
+            divider: Icon(Icons.chevron_right, color: Colors.orange),
+            overflow: WrapOverflow(
+                direction: Axis.horizontal, keepLastDivider: false),
+          ),
+        ),
+        ListView(
+          padding: EdgeInsets.all(16.0),
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          children: (subtree.folders.map<Widget>((folder) {
+                    return ListTile(
+                      title: Text(folder.path),
+                      leading: Icon(Icons.folder),
+                      onTap: () => _handleFolderTap(folder),
+                    );
+                  }).toList() +
+                  subtree.films.map<Widget>((film) {
+                    return ListTile(
+                      title: Text(film.title),
+                      leading: Icon(Icons.movie,
+                          color:
+                              film.isSupported() ? Colors.green : Colors.red),
+                      onTap: () => _handleFilmTap(film),
+                    );
+                  }).toList())
+              .expand((element) => [element, Divider()])
+              .toList(),
+        ),
+      ],
     );
   }
 
   void _loadFilms() {
     setState(() {
+      _loadingFilms = true;
       _path.length = 0;
     });
 
     FilmServer.getFilms().then((films) {
+      print(films);
       setState(() {
+        _loadingFilms = false;
         _films = films;
       });
     }, onError: (err) {
+      setState(() {
+        _loadingFilms = false;
+      });
       print('Errore: $err');
     });
   }

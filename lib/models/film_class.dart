@@ -27,7 +27,7 @@ class FilmClass {
 
   String notSupportedReason() {
     if (!_supportedFormats.contains(_format)) {
-      return 'Formato ${_format} non supportato';
+      return 'Formato $_format non supportato';
     } else {
       if (title.contains("'")) {
         return 'Il titolo contiene un apostrofo';

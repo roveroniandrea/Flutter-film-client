@@ -14,7 +14,9 @@ class FilmServer {
   }
 
   static Future<FilmFolderClass> getFilms() async {
+    throw new Exception('TODO');// TODO
     final response = await http.get(_url);
+    print('whta');
     if(response.statusCode == 200){
       return FilmFolderClass.fromJson(json.decode(response.body));
     }
