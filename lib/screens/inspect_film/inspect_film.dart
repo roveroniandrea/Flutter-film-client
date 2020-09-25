@@ -1,6 +1,7 @@
 import 'package:film_server/components/custom_progress.dart';
 import 'package:film_server/models/cast_local_argument.dart';
 import 'package:film_server/models/film_class.dart';
+import 'package:film_server/models/film_server_interface.dart';
 import 'package:film_server/models/inspect_film_argument.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class InspectFilm extends StatefulWidget {
 }
 
 class _InspectFilmState extends State<InspectFilm> {
-  final List<String> _chromecasts = [];
+  List<String> _chromecasts = [];
   FilmClass _film;
   String _fullPath = '';
   bool _transmittingOnChromecast = false;
@@ -139,16 +140,21 @@ class _InspectFilmState extends State<InspectFilm> {
   }
 
   void _loadChomecasts() {
-    // TODO:
     setState(() {
       _searchingChromecasts = true;
       _chromecasts.length = 0;
     });
-    Future.delayed(Duration(seconds: 1), () {
+    FilmServerInterface.getChromecasts().then((chromecasts) {
       setState(() {
         _searchingChromecasts = false;
-        _chromecasts.add('Soggiorno');
-        _chromecasts.add('Camera');
+        _chromecasts = chromecasts;
+      });
+    }, onError: (err){
+      // TODO
+      print(err.toString());
+      setState(() {
+        _searchingChromecasts = false;
+        _chromecasts = [];
       });
     });
   }

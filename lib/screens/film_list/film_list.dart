@@ -91,6 +91,9 @@ class _FilmListState extends State<FilmList> {
                   .firstWhere((folder) => folder.path == p, orElse: () => null)
             }
         });
+    if(subtree == null){
+      subtree = new FilmFolderClass(path: '', folders: [], films: []);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
