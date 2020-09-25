@@ -18,15 +18,18 @@ class CustomProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hasError) {
-      return errorChild;
+      return SizedBox.expand(
+        child: errorChild,
+      );
     }
     return isLoading
         ? Center(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  child: Text(loadingText, style: TextStyle(fontSize: 20.0)),
-                  padding: EdgeInsets.all(30.0),
+                  child: Text(loadingText, style: TextStyle(fontSize: 25.0)),
+                  padding: EdgeInsets.all(40.0),
                 ),
                 SizedBox(
                   child: CircularProgressIndicator(

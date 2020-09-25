@@ -1,7 +1,10 @@
+import 'dart:async';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:film_server/components/custom_progress.dart';
 import 'package:film_server/models/film_class.dart';
 import 'package:film_server/models/film_folder_class.dart';
-import 'package:film_server/models/film_server.dart';
+import 'package:film_server/models/film_server_interface.dart';
 import 'package:film_server/models/inspect_film_argument.dart';
 import 'package:film_server/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,23 +16,41 @@ class FilmList extends StatefulWidget {
 }
 
 class _FilmListState extends State<FilmList> {
-  FilmFolderClass _films = FilmFolderClass(path: '', folders: [
-    FilmFolderClass(path: 'Star Wars', films: [
-      FilmClass(title: 'La minaccia fantasma.mp4'),
-      FilmClass(title: 'L attacco dei cloni.m4v')
-    ], folders: [])
-  ], films: [
-    FilmClass(title: 'Cary Grant.pdf')
-  ]);
+  /// Elenco dei film con le varie cartelle
+  FilmFolderClass _films;
 
+  /// Percorso del breadcrumb
   final List<String> _path = [];
 
+  /// true se sta chiedendo i film al server
   bool _loadingFilms = false;
+
+  /// diverso da '' se c'è stato un errore nella richiesta dei film
+  String _loadingError = '';
+
+  ConnectivityResult _connectivityResult = ConnectivityResult.wifi;
+  StreamSubscription<ConnectivityResult> _streamSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadFilms();
+
+    final Connectivity _connectivity = new Connectivity();
+    _streamSubscription =
+        _connectivity.onConnectivityChanged.listen((connectivityResult) {
+      setState(() {
+        _connectivityResult = connectivityResult;
+      });
+      if (_connectivityResult == ConnectivityResult.wifi) {
+        _loadFilms();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _streamSubscription.cancel();
   }
 
   @override
@@ -51,9 +72,11 @@ class _FilmListState extends State<FilmList> {
             ],
           ),
           body: CustomProgress(
-              hasError: false,
+              hasError: _connectivityResult != ConnectivityResult.wifi ||
+                  _loadingError != '',
               loadingText: 'Recupero i film...',
               isLoading: _loadingFilms,
+              errorChild: _buildErrorWidget(),
               child: _buildFilmList())),
       onWillPop: _onBackPressed,
     );
@@ -115,23 +138,26 @@ class _FilmListState extends State<FilmList> {
     );
   }
 
+  /// Chiede la lista dei film al server
   void _loadFilms() {
     setState(() {
       _loadingFilms = true;
       _path.length = 0;
+      _loadingError = '';
     });
 
-    FilmServer.getFilms().then((films) {
+    FilmServerInterface.getFilms().then((films) {
       print(films);
       setState(() {
         _loadingFilms = false;
         _films = films;
+        _loadingError = '';
       });
     }, onError: (err) {
       setState(() {
         _loadingFilms = false;
+        _loadingError = err.toString();
       });
-      print('Errore: $err');
     });
   }
 
@@ -173,11 +199,41 @@ class _FilmListState extends State<FilmList> {
     });
   }
 
+  /// Gestisce il tap su un elemento del breadcrumb.
+  /// @param pathLength index dell'elemento cliccato (0- based)
   void _handleBreacrumbTap(int pathLength) {
     if (_path.length != pathLength) {
       setState(() {
         _path.length = pathLength;
       });
     }
+  }
+
+  /// Crea il widget per l'errore di connessione
+  Widget _buildErrorWidget() {
+    return Container(
+        padding: EdgeInsets.only(top: 100.0),
+        child: Column(
+          children: [
+            Text(
+              _connectivityResult != ConnectivityResult.wifi
+                  ? 'Non sei connesso al Wi-Fi'
+                  : 'Il server è spento o ha rifiutato la connessione',
+              style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Container(
+              padding: EdgeInsets.only(top: 30.0),
+              child: Icon(
+                  _connectivityResult != ConnectivityResult.wifi
+                      ? Icons.signal_wifi_off
+                      : Icons.cloud_off,
+                  size: 100.0),
+            )
+          ],
+        ));
   }
 }

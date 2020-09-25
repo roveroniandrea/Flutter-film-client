@@ -48,23 +48,24 @@ class _InspectFilmState extends State<InspectFilm> {
   }
 
   Widget _buildBody() {
-    final List<Widget> columnChildren = _film != null
-        ? [
-            Container(
-              padding: EdgeInsets.all(20.0),
-              child: Text(
-                'Dove vuoi guardare\n"${_film.humanTitle}"?',
-                style: TextStyle(fontSize: 25.0),
-                textAlign: TextAlign.center,
+    return _film != null
+        ? Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(20.0),
+                child: Text(
+                  'Dove vuoi guardare\n"${_film.humanTitle}"?',
+                  style: TextStyle(fontSize: 25.0),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-            Divider()
-          ]
-        : [];
-    if (_film != null) {
-      columnChildren.add(_buildButtons());
-    }
-    return Column(children: columnChildren);
+              Divider(),
+              _buildButtons()
+            ],
+          )
+        : Column(
+            children: [],
+          );
   }
 
   Widget _buildButtons() {

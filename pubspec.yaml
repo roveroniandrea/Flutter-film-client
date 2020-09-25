@@ -31,6 +31,7 @@ dependencies:
 
   flutter_breadcrumb: ^0.1.2
   http: ^0.12.2
+  connectivity: ^0.3.0
 
 dev_dependencies:
   flutter_test:
