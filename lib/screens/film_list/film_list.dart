@@ -42,7 +42,7 @@ class _FilmListState extends State<FilmList> {
         _connectivityResult = connectivityResult;
       });
       if (_connectivityResult == ConnectivityResult.wifi) {
-        _loadFilms();
+        _loadFilms(false);
       }
     });
   }
@@ -62,7 +62,7 @@ class _FilmListState extends State<FilmList> {
             actions: [
               IconButton(
                 icon: Icon(Icons.refresh),
-                onPressed: _loadFilms,
+                onPressed: () => _loadFilms(true),
               ),
               IconButton(
                 icon: Icon(Icons.settings),
@@ -142,14 +142,14 @@ class _FilmListState extends State<FilmList> {
   }
 
   /// Chiede la lista dei film al server
-  void _loadFilms() {
+  void _loadFilms(bool requestReload) {
     setState(() {
       _loadingFilms = true;
       _path.length = 0;
       _loadingError = '';
     });
-
-    FilmServerInterface.getFilms().then((films) {
+    Future<FilmFolderClass> httpCall = requestReload? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
+    httpCall.then((films) {
       print(films);
       setState(() {
         _loadingFilms = false;

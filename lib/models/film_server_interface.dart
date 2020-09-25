@@ -41,4 +41,13 @@ class FilmServerInterface {
       return false;
     }
   }
+
+  static Future<FilmFolderClass> reloadFilmDirectory() async {
+    final response = await http.get('$_url/realoadDir');
+    if (response.statusCode == 200) {
+      return FilmFolderClass.fromJson(json.decode(response.body));
+    } else {
+      throw new Exception('Error reloadFilmDirectory ${response.reasonPhrase}');
+    }
+  }
 }
