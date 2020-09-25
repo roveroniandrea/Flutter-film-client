@@ -18,9 +18,8 @@ class CustomProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hasError) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [errorChild],
+      return Center(
+        child: errorChild,
       );
     }
     return isLoading

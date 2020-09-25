@@ -1,4 +1,4 @@
-package com.roveroniandrea.film_server
+package com.roveroniandrea.film_client
 
 import io.flutter.embedding.android.FlutterActivity
 

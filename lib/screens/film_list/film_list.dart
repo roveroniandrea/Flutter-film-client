@@ -91,7 +91,7 @@ class _FilmListState extends State<FilmList> {
                   .firstWhere((folder) => folder.path == p, orElse: () => null)
             }
         });
-    if(subtree == null){
+    if (subtree == null) {
       subtree = new FilmFolderClass(path: '', folders: [], films: []);
     }
     return Column(
@@ -148,15 +148,17 @@ class _FilmListState extends State<FilmList> {
       _path.length = 0;
       _loadingError = '';
     });
-    Future<FilmFolderClass> httpCall = requestReload? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
+    Future<FilmFolderClass> httpCall = requestReload
+        ? FilmServerInterface.reloadFilmDirectory()
+        : FilmServerInterface.getFilms();
     httpCall.then((films) {
-      print(films);
       setState(() {
         _loadingFilms = false;
         _films = films;
         _loadingError = '';
       });
     }, onError: (err) {
+      print(err);
       setState(() {
         _loadingFilms = false;
         _loadingError = err.toString();

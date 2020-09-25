@@ -32,10 +32,17 @@ dependencies:
   flutter_breadcrumb: ^0.1.2
   http: ^0.12.2
   connectivity: ^0.3.0
+  shared_preferences: ^0.4.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.8.0"
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/film_client_icon.jpg"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

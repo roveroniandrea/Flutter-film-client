@@ -21,6 +21,7 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
         _fullPath = arg.fullPath;
       });
     });
+    print('${_film.toString()}$_fullPath');
   }
 
   @override
