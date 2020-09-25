@@ -149,7 +149,7 @@ class _InspectFilmState extends State<InspectFilm> {
         _searchingChromecasts = false;
         _chromecasts = chromecasts;
       });
-    }, onError: (err){
+    }, onError: (err) {
       // TODO
       print(err.toString());
       setState(() {
@@ -168,8 +168,8 @@ class _InspectFilmState extends State<InspectFilm> {
     setState(() {
       _transmittingOnChromecast = true;
     });
-    //TODO
-    Future.delayed(Duration(seconds: 1), () {
+
+    FilmServerInterface.castOnDevice(chromecast, _fullPath).then((success) {
       setState(() {
         _transmittingOnChromecast = false;
       });
@@ -177,7 +177,7 @@ class _InspectFilmState extends State<InspectFilm> {
       Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
           content: Container(
             child: Text(
-              'Trasmissione avvenuta!',
+              success ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
               style: TextStyle(fontSize: 20.0),
             ),
             padding: EdgeInsets.all(8.0),

@@ -191,7 +191,7 @@ class _FilmListState extends State<FilmList> {
   }
 
   void _handleFilmTap(FilmClass film) {
-    final String fullPath = _path.join('/');
+    final String fullPath = '${_path.join('/')}/${film.title}';
     Navigator.pushNamed(context, InspectFilmArgument.routeName,
         arguments: InspectFilmArgument(film: film, fullPath: fullPath));
   }
