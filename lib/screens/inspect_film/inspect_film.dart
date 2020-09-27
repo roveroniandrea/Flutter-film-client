@@ -1,8 +1,8 @@
-import 'package:film_server/components/custom_progress.dart';
-import 'package:film_server/models/cast_local_argument.dart';
-import 'package:film_server/models/film_class.dart';
-import 'package:film_server/models/film_server_interface.dart';
-import 'package:film_server/models/inspect_film_argument.dart';
+import 'package:film_client/components/custom_progress.dart';
+import 'package:film_client/models/cast_local_argument.dart';
+import 'package:film_client/models/film_class.dart';
+import 'package:film_client/models/film_server_interface.dart';
+import 'package:film_client/models/inspect_film_argument.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

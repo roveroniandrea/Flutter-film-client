@@ -1,4 +1,4 @@
-import 'package:film_server/models/film_server_interface.dart';
+import 'package:film_client/models/film_server_interface.dart';
 import 'package:flutter/material.dart';
 
 class OptionsScreen extends StatefulWidget {

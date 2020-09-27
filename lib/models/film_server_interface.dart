@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:film_server/models/shared_preferences_keys.dart';
+import 'package:film_client/models/shared_preferences_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'film_folder_class.dart';

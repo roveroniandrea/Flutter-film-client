@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:film_server/components/custom_progress.dart';
-import 'package:film_server/models/film_class.dart';
-import 'package:film_server/models/film_folder_class.dart';
-import 'package:film_server/models/film_server_interface.dart';
-import 'package:film_server/models/inspect_film_argument.dart';
-import 'package:film_server/screens/option_screen/options_screen.dart';
+import 'package:film_client/components/custom_progress.dart';
+import 'package:film_client/models/film_class.dart';
+import 'package:film_client/models/film_folder_class.dart';
+import 'package:film_client/models/film_server_interface.dart';
+import 'package:film_client/models/inspect_film_argument.dart';
+import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 
@@ -38,13 +38,13 @@ class _FilmListState extends State<FilmList> {
     final Connectivity _connectivity = new Connectivity();
     _streamSubscription =
         _connectivity.onConnectivityChanged.listen((connectivityResult) {
-      setState(() {
-        _connectivityResult = connectivityResult;
-      });
-      if (_connectivityResult == ConnectivityResult.wifi) {
-        _loadFilms(false);
-      }
-    });
+          setState(() {
+            _connectivityResult = connectivityResult;
+          });
+          if (_connectivityResult == ConnectivityResult.wifi) {
+            _loadFilms(false);
+          }
+        });
   }
 
   @override
@@ -84,13 +84,14 @@ class _FilmListState extends State<FilmList> {
 
   Widget _buildFilmList() {
     FilmFolderClass subtree = _films;
-    _path.forEach((p) => {
-          if (subtree != null)
-            {
-              subtree = _films.folders
-                  .firstWhere((folder) => folder.path == p, orElse: () => null)
-            }
-        });
+    _path.forEach((p) =>
+    {
+      if (subtree != null)
+        {
+          subtree = _films.folders
+              .firstWhere((folder) => folder.path == p, orElse: () => null)
+        }
+    });
     if (subtree == null) {
       subtree = new FilmFolderClass(path: '', folders: [], films: []);
     }
@@ -103,7 +104,8 @@ class _FilmListState extends State<FilmList> {
             items: (['Film'] + _path)
                 .asMap()
                 .entries
-                .map((entry) => BreadCrumbItem(
+                .map((entry) =>
+                BreadCrumbItem(
                     content: Text(entry.value,
                         style: TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold)),
@@ -114,29 +116,32 @@ class _FilmListState extends State<FilmList> {
                 direction: Axis.horizontal, keepLastDivider: false),
           ),
         ),
-        ListView(
-          padding: EdgeInsets.all(16.0),
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          children: (subtree.folders.map<Widget>((folder) {
-                    return ListTile(
-                      title: Text(folder.path),
-                      leading: Icon(Icons.folder),
-                      onTap: () => _handleFolderTap(folder),
-                    );
-                  }).toList() +
-                  subtree.films.map<Widget>((film) {
-                    return ListTile(
-                      title: Text(film.title),
-                      leading: Icon(Icons.movie,
-                          color:
-                              film.isSupported() ? Colors.green : Colors.red),
-                      onTap: () => _handleFilmTap(film),
-                    );
-                  }).toList())
-              .expand((element) => [element, Divider()])
-              .toList(),
-        ),
+        Expanded(
+          child: ListView(
+              padding: EdgeInsets.all(16.0),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              children:
+              subtree.films.map<Widget>((film) {
+                return ListTile(
+                  title: Text(film.title),
+                  leading: Icon(Icons.movie,
+                      color:
+                      film.isSupported() ? Colors.green : Colors.red),
+                  onTap: () => _handleFilmTap(film),
+                );
+              }).toList()
+              + (subtree.folders.map<Widget>((folder) {
+                return ListTile(
+                  title: Text(folder.path),
+                  leading: Icon(Icons.folder),
+                  onTap: () => _handleFolderTap(folder),
+                );
+              }).toList()
+                  .expand((element) => [element, Divider()])
+                  .toList()),
+              ),
+        )
       ],
     );
   }

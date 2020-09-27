@@ -1,9 +1,9 @@
-import 'package:film_server/models/cast_local_argument.dart';
-import 'package:film_server/models/inspect_film_argument.dart';
-import 'package:film_server/screens/cast_local/cast_local.dart';
-import 'package:film_server/screens/film_list/film_list.dart';
-import 'package:film_server/screens/inspect_film/inspect_film.dart';
-import 'package:film_server/screens/option_screen/options_screen.dart';
+import 'package:film_client/models/cast_local_argument.dart';
+import 'package:film_client/models/inspect_film_argument.dart';
+import 'package:film_client/screens/cast_local/cast_local.dart';
+import 'package:film_client/screens/film_list/film_list.dart';
+import 'package:film_client/screens/inspect_film/inspect_film.dart';
+import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

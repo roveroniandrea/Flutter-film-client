@@ -1,5 +1,5 @@
-import 'package:film_server/models/cast_local_argument.dart';
-import 'package:film_server/models/film_class.dart';
+import 'package:film_client/models/cast_local_argument.dart';
+import 'package:film_client/models/film_class.dart';
 import 'package:flutter/material.dart';
 
 class CastLocalScreen extends StatefulWidget {

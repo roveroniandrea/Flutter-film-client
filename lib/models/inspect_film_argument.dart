@@ -1,4 +1,4 @@
-import 'package:film_server/models/film_class.dart';
+import 'package:film_client/models/film_class.dart';
 
 class InspectFilmArgument {
   static final String routeName = '/inspect';
