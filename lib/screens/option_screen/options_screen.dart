@@ -71,20 +71,16 @@ class _OptionsScreenState extends State<OptionsScreen> {
                     ],
                   ),
                   Divider(),
-                  Row(
-                    children: [
-                      Text('Numero porta del server: ', style: _textStyle),
-                      Container(
-                          width: 100,
-                          child: TextFormField(
-                            keyboardType: TextInputType.number,
-                            style: _textStyle,
-                            textAlign: TextAlign.center,
-                            initialValue: '$_serverPort',
-                            onChanged: (value) => _changePort(int.parse(value)),
-                          )),
-                    ],
-                  ),
+                  Text('Numero porta del server: ', style: _textStyle),
+                  Container(
+                      width: 100,
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: _textStyle,
+                        textAlign: TextAlign.center,
+                        initialValue: '$_serverPort',
+                        onChanged: (value) => _changePort(int.parse(value)),
+                      )),
                 ]
               : [],
         ),
@@ -106,12 +102,12 @@ class _OptionsScreenState extends State<OptionsScreen> {
     });
   }
 
-  void _changeIp(int ipPosition, String ipNumber){
+  void _changeIp(int ipPosition, String ipNumber) {
     _serverIp[ipPosition] = ipNumber;
     FilmServerInterface.changeIp(_serverIp.join('.'));
   }
 
-  void _changePort(int port){
+  void _changePort(int port) {
     _serverPort = port;
     FilmServerInterface.changePort(_serverPort);
   }

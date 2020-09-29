@@ -33,16 +33,24 @@ dependencies:
   http: ^0.12.2
   connectivity: ^0.3.0
   shared_preferences: ^0.4.3
+  package_info: ^0.4.3
+  url_launcher: ^5.7.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: "^0.8.0"
+  flutter_native_splash: ^0.1.9
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/film_client_icon.jpg"
+
+flutter_native_splash:
+  image: assets/icon/film_client_splash.png
+  color: "ffffff"
+  android_disable_fullscreen: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

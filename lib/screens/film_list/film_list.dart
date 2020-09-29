@@ -38,13 +38,15 @@ class _FilmListState extends State<FilmList> {
     final Connectivity _connectivity = new Connectivity();
     _streamSubscription =
         _connectivity.onConnectivityChanged.listen((connectivityResult) {
-          setState(() {
-            _connectivityResult = connectivityResult;
-          });
-          if (_connectivityResult == ConnectivityResult.wifi) {
-            _loadFilms(false);
-          }
-        });
+      setState(() {
+        _connectivityResult = connectivityResult;
+      });
+      if (_connectivityResult == ConnectivityResult.wifi) {
+        _loadFilms(false);
+      }
+    });
+
+    _checkForUpdates();
   }
 
   @override
@@ -84,14 +86,13 @@ class _FilmListState extends State<FilmList> {
 
   Widget _buildFilmList() {
     FilmFolderClass subtree = _films;
-    _path.forEach((p) =>
-    {
-      if (subtree != null)
-        {
-          subtree = _films.folders
-              .firstWhere((folder) => folder.path == p, orElse: () => null)
-        }
-    });
+    _path.forEach((p) => {
+          if (subtree != null)
+            {
+              subtree = _films.folders
+                  .firstWhere((folder) => folder.path == p, orElse: () => null)
+            }
+        });
     if (subtree == null) {
       subtree = new FilmFolderClass(path: '', folders: [], films: []);
     }
@@ -104,8 +105,7 @@ class _FilmListState extends State<FilmList> {
             items: (['Film'] + _path)
                 .asMap()
                 .entries
-                .map((entry) =>
-                BreadCrumbItem(
+                .map((entry) => BreadCrumbItem(
                     content: Text(entry.value,
                         style: TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold)),
@@ -118,29 +118,29 @@ class _FilmListState extends State<FilmList> {
         ),
         Expanded(
           child: ListView(
-              padding: EdgeInsets.all(16.0),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children:
-              subtree.films.map<Widget>((film) {
-                return ListTile(
-                  title: Text(film.title),
-                  leading: Icon(Icons.movie,
-                      color:
-                      film.isSupported() ? Colors.green : Colors.red),
-                  onTap: () => _handleFilmTap(film),
-                );
-              }).toList()
-              + (subtree.folders.map<Widget>((folder) {
-                return ListTile(
-                  title: Text(folder.path),
-                  leading: Icon(Icons.folder),
-                  onTap: () => _handleFolderTap(folder),
-                );
-              }).toList()
-                  .expand((element) => [element, Divider()])
-                  .toList()),
-              ),
+            padding: EdgeInsets.all(16.0),
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            children: (subtree.films.map<Widget>((film) {
+                  return ListTile(
+                    title: Text(film.title),
+                    leading: Icon(Icons.movie,
+                        color: film.isSupported() ? Colors.green : Colors.red),
+                    onTap: () => _handleFilmTap(film),
+                  );
+                }).toList() +
+                (subtree.folders
+                    .map<Widget>((folder) {
+                      return ListTile(
+                        title: Text(folder.path),
+                        leading: Icon(Icons.folder),
+                        onTap: () => _handleFolderTap(folder),
+                      );
+                    })
+                    .toList()))
+                    .expand((element) => [element, Divider()])
+                    .toList(),
+          ),
         )
       ],
     );
@@ -163,7 +163,6 @@ class _FilmListState extends State<FilmList> {
         _loadingError = '';
       });
     }, onError: (err) {
-      print(err);
       setState(() {
         _loadingFilms = false;
         _loadingError = err.toString();
@@ -185,13 +184,13 @@ class _FilmListState extends State<FilmList> {
             title: Text("Vuoi uscire dall'app?"),
             actions: [
               FlatButton(
+                child: Text('Sì'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+              FlatButton(
                 child: Text('No'),
                 onPressed: () => Navigator.of(context).pop(false),
               ),
-              FlatButton(
-                child: Text('Sì'),
-                onPressed: () => Navigator.of(context).pop(true),
-              )
             ],
           ));
     }
@@ -245,5 +244,35 @@ class _FilmListState extends State<FilmList> {
             )
           ],
         ));
+  }
+
+  void _checkForUpdates() async {
+    FilmServerInterface.checkForUpdates().then((updateAvailable) {
+      if (updateAvailable) {
+        Future<bool> updateDialog = showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            child: AlertDialog(
+              title: Text(
+                  "E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
+              actions: [
+                FlatButton(
+                  child: Text('Sì'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                ),
+                FlatButton(
+                  child: Text('No'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ],
+            ));
+
+        updateDialog.then((updateYN) {
+          if (updateYN == true) {
+            FilmServerInterface.openDownloadLink();
+          }
+        });
+      }
+    }, onError: (err) => {});
   }
 }
