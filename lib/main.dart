@@ -5,7 +5,6 @@ import 'package:film_client/screens/film_list/film_list.dart';
 import 'package:film_client/screens/inspect_film/inspect_film.dart';
 import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyApp());

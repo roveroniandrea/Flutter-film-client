@@ -122,4 +122,14 @@ class FilmServerInterface {
       throw new Exception('Could not launch $url/getApp');
     }
   }
+
+  static Future<String> getFilmUrl(String fullPath) async{
+    await _loadSettings();
+    if(fullPath.startsWith('/')){
+      fullPath = fullPath.replaceFirst('/', '');
+    }
+
+    final String encoded = Uri.encodeFull(fullPath);
+    return 'http://$_ip:$_port/$encoded';
+  }
 }
