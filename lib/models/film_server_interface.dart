@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:film_client/models/shared_preferences_keys.dart';
+import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'film_folder_class.dart';
 import 'package:http/http.dart' as http;
@@ -99,5 +101,25 @@ class FilmServerInterface {
   static void changePort(int port){
     _port = port;
     _saveSettings();
+  }
+
+  static Future<bool> checkForUpdates() async{
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final url = await _url;
+    final response = await http.get('$url/appVersion');
+    if (response.statusCode == 200) {
+      return int.parse(packageInfo.buildNumber) < json.decode(response.body);
+    } else {
+      throw new Exception('Error check version ${response.reasonPhrase}');
+    }
+  }
+
+  static void openDownloadLink() async{
+    final url = await _url;
+    if (await canLaunch('$url/getApp')) {
+      await launch('$url/getApp');
+    } else {
+      throw new Exception('Could not launch $url/getApp');
+    }
   }
 }

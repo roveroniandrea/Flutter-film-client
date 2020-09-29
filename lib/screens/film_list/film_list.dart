@@ -118,9 +118,11 @@ class _FilmListState extends State<FilmList> {
         ),
         Expanded(
           child: ListView(
+            key: PageStorageKey<String>('list${_path.length}'),
             padding: EdgeInsets.all(16.0),
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
+            controller: ScrollController(keepScrollOffset: true),
             children: (subtree.films.map<Widget>((film) {
                   return ListTile(
                     title: Text(film.title),
