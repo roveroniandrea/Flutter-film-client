@@ -1,4 +1,5 @@
 import 'package:chewie/chewie.dart';
+import 'package:film_client/components/custom_progress.dart';
 import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
@@ -52,25 +53,29 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
       appBar: AppBar(
         title: Text(_film != null ? _film.humanTitle : ''),
       ),
-      body: _aspectRatioAvailable
-          ? Chewie(
-              controller: ChewieController(
-                  allowFullScreen: true,
-                  allowMuting: true,
-                  aspectRatio: _controller.value.aspectRatio,
-                  autoInitialize: true,
-                  deviceOrientationsAfterFullScreen: [
-                    DeviceOrientation.portraitUp
-                  ],
-                  fullScreenByDefault: false,
-                  looping: false,
-                  showControls: true,
-                  startAt: Duration.zero,
-                  autoPlay: true,
-                  allowedScreenSleep: false,
-                  videoPlayerController: _controller),
-            )
-          : Container(),
+      body: CustomProgress(
+        errorChild: Text('Errore non specificato', style: TextStyle(color: Colors.red),),
+        hasError: false,
+        isLoading: !_aspectRatioAvailable,
+        loadingText: 'Connessione al server...',
+        child: Chewie(
+          controller: ChewieController(
+              allowFullScreen: true,
+              allowMuting: true,
+              aspectRatio: _controller.value.aspectRatio,
+              autoInitialize: true,
+              deviceOrientationsAfterFullScreen: [
+                DeviceOrientation.portraitUp
+              ],
+              fullScreenByDefault: false,
+              looping: false,
+              showControls: true,
+              startAt: Duration.zero,
+              autoPlay: true,
+              allowedScreenSleep: false,
+              videoPlayerController: _controller),
+        ),
+      )
     );
   }
 }
