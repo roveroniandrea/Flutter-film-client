@@ -1,4 +1,5 @@
 import 'package:film_client/components/custom_progress.dart';
+import 'package:film_client/components/restarting_server_dialog.dart';
 import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
@@ -169,20 +170,36 @@ class _InspectFilmState extends State<InspectFilm> {
       _transmittingOnChromecast = true;
     });
 
-    FilmServerInterface.castOnDevice(chromecast, _fullPath).then((success) {
+    FilmServerInterface.castOnDevice(chromecast, _fullPath).then((castResult) {
       setState(() {
         _transmittingOnChromecast = false;
       });
-
-      Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
-          content: Container(
-            child: Text(
-              success ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
-              style: TextStyle(fontSize: 20.0),
+      // Se il server non è in fase di riavvio mostro lo snackbar
+      if (castResult != CastResult.Restarting) {
+        Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
+            content: Container(
+              child: Text(
+                castResult == CastResult.Done
+                    ? 'Trasmissione avvenuta!'
+                    : 'Errore in trasmissione',
+                style: TextStyle(fontSize: 20.0),
+              ),
+              padding: EdgeInsets.all(6.0),
             ),
-            padding: EdgeInsets.all(8.0),
-          ),
-          duration: Duration(seconds: 3)));
+            duration: Duration(seconds: 3)));
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return RestartingServerDialog();
+            });
+
+        Future.delayed(FilmServerInterface.timeToRestart)
+            .then((_) {
+          Navigator.of(context).pop(true);
+          _handleCast(chromecast);
+        });
+      }
     });
   }
 }

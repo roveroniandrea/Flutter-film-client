@@ -7,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'film_folder_class.dart';
 import 'package:http/http.dart' as http;
 
+enum CastResult {Done, Restarting, Error}
+
 class FilmServerInterface {
   static String _ip = '192.168.1.8';
   static int _port = 9000;
@@ -15,6 +17,7 @@ class FilmServerInterface {
 
   static final String _defaultIp = '192.168.1.8';
   static final int _defaultPort = 9000;
+  static final Duration timeToRestart = Duration(seconds: 7);
 
   static Future<String> get _url async {
     await _loadSettings();
@@ -23,7 +26,8 @@ class FilmServerInterface {
 
   static Future<FilmFolderClass> getFilms() async {
     final url = await _url;
-    final response = await http.get(url);
+    final response = await http.get(url)
+        .catchError((err){return http.Response('', 404);});
     if (response.statusCode == 200) {
       return FilmFolderClass.fromJson(json.decode(response.body));
     } else {
@@ -33,7 +37,8 @@ class FilmServerInterface {
 
   static Future<List<String>> getChromecasts() async {
     final url = await _url;
-    final response = await http.get('$url/getDevices');
+    final response = await http.get('$url/getDevices')
+        .catchError((err){return http.Response('', 404);});
     if (response.statusCode == 200) {
       return (json.decode(response.body) as List<dynamic>).map((chr) {
         return chr as String;
@@ -43,20 +48,27 @@ class FilmServerInterface {
     }
   }
 
-  static Future<bool> castOnDevice(String chromecast, String fullPath) async {
+  static Future<CastResult> castOnDevice(String chromecast, String fullPath) async {
     final url = await _url;
     final response =
-        await http.get('$url/devicePlay?path=$fullPath&devName=$chromecast');
+        await http.get('$url/devicePlay?path=$fullPath&devName=$chromecast')
+            .catchError((err){return http.Response('', 404);});
     if (response.statusCode == 200) {
-      return true;
+      return CastResult.Done;
     } else {
-      return false;
+      if(response.statusCode == 503){
+        return CastResult.Restarting;
+      }
+      else{
+        return CastResult.Error;
+      }
     }
   }
 
   static Future<FilmFolderClass> reloadFilmDirectory() async {
     final url = await _url;
-    final response = await http.get('$url/realoadDir');
+    final response = await http.get('$url/realoadDir')
+        .catchError((err){return http.Response('', 404);});;
     if (response.statusCode == 200) {
       return FilmFolderClass.fromJson(json.decode(response.body));
     } else {
@@ -106,7 +118,8 @@ class FilmServerInterface {
   static Future<bool> checkForUpdates() async{
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final url = await _url;
-    final response = await http.get('$url/appVersion');
+    final response = await http.get('$url/appVersion')
+        .catchError((err){return http.Response('', 404);});;
     if (response.statusCode == 200) {
       return int.parse(packageInfo.buildNumber) < json.decode(response.body);
     } else {

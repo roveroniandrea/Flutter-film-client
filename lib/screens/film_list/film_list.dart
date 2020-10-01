@@ -8,6 +8,7 @@ import 'package:film_client/models/film_server_interface.dart';
 import 'package:film_client/models/inspect_film_argument.dart';
 import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 
 class FilmList extends StatefulWidget {
@@ -34,6 +35,8 @@ class _FilmListState extends State<FilmList> {
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     final Connectivity _connectivity = new Connectivity();
     _streamSubscription =
