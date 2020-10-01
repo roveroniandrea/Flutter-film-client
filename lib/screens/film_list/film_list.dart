@@ -258,7 +258,7 @@ class _FilmListState extends State<FilmList> {
   void _checkForUpdates() async {
     _alreadyCheckingForUpdates = true;
     FilmServerInterface.checkForUpdates().then((updateAvailable) {
-      if (updateAvailable || true) {
+      if (updateAvailable) {
         Future<bool> updateDialog = showDialog<bool>(
             context: context,
             barrierDismissible: false,
