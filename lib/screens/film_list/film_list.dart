@@ -32,6 +32,9 @@ class _FilmListState extends State<FilmList> {
   ConnectivityResult _connectivityResult = ConnectivityResult.wifi;
   StreamSubscription<ConnectivityResult> _streamSubscription;
 
+  bool _skipUpdate = false;
+  bool _alreadyCheckingForUpdates = false;
+
   @override
   void initState() {
     super.initState();
@@ -48,8 +51,6 @@ class _FilmListState extends State<FilmList> {
         _loadFilms(false);
       }
     });
-
-    _checkForUpdates();
   }
 
   @override
@@ -127,24 +128,23 @@ class _FilmListState extends State<FilmList> {
             shrinkWrap: true,
             controller: ScrollController(keepScrollOffset: true),
             children: (subtree.films.map<Widget>((film) {
-                  return ListTile(
-                    title: Text(film.title),
-                    leading: Icon(Icons.movie,
-                        color: film.isSupported() ? Colors.green : Colors.red),
-                    onTap: () => _handleFilmTap(film),
-                  );
-                }).toList() +
-                (subtree.folders
-                    .map<Widget>((folder) {
+                      return ListTile(
+                        title: Text(film.title),
+                        leading: Icon(Icons.movie,
+                            color:
+                                film.isSupported() ? Colors.green : Colors.red),
+                        onTap: () => _handleFilmTap(film),
+                      );
+                    }).toList() +
+                    (subtree.folders.map<Widget>((folder) {
                       return ListTile(
                         title: Text(folder.path),
                         leading: Icon(Icons.folder),
                         onTap: () => _handleFolderTap(folder),
                       );
-                    })
-                    .toList()))
-                    .expand((element) => [element, Divider()])
-                    .toList(),
+                    }).toList()))
+                .expand((element) => [element, Divider()])
+                .toList(),
           ),
         )
       ],
@@ -153,6 +153,10 @@ class _FilmListState extends State<FilmList> {
 
   /// Chiede la lista dei film al server
   void _loadFilms(bool requestReload) {
+    if (!_alreadyCheckingForUpdates && !_skipUpdate) {
+      _checkForUpdates();
+    }
+
     setState(() {
       _loadingFilms = true;
       _path.length = 0;
@@ -252,8 +256,9 @@ class _FilmListState extends State<FilmList> {
   }
 
   void _checkForUpdates() async {
+    _alreadyCheckingForUpdates = true;
     FilmServerInterface.checkForUpdates().then((updateAvailable) {
-      if (updateAvailable) {
+      if (updateAvailable || true) {
         Future<bool> updateDialog = showDialog<bool>(
             context: context,
             barrierDismissible: false,
@@ -273,8 +278,11 @@ class _FilmListState extends State<FilmList> {
             ));
 
         updateDialog.then((updateYN) {
+          _alreadyCheckingForUpdates = false;
           if (updateYN == true) {
             FilmServerInterface.openDownloadLink();
+          } else {
+            _skipUpdate = true;
           }
         });
       }
