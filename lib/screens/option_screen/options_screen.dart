@@ -1,3 +1,4 @@
+import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/models/film_server_interface.dart';
 import 'package:flutter/material.dart';
 
@@ -81,6 +82,22 @@ class _OptionsScreenState extends State<OptionsScreen> {
                         initialValue: '$_serverPort',
                         onChanged: (value) => _changePort(int.parse(value)),
                       )),
+                  Divider(),
+                  Text('Tema dell\'applicazione:', style: _textStyle),
+                  Wrap(
+                    children: _buildThemeSquares(),
+                  ),
+                  Divider(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Modalità scura:', style: _textStyle),
+                      Switch(
+                        value: !DynamicTheme.isLightTheme,
+                        onChanged: (ligth) => DynamicTheme.of(context).setBrightness(!ligth),
+                      )
+                    ],
+                  )
                 ]
               : [],
         ),
@@ -110,5 +127,30 @@ class _OptionsScreenState extends State<OptionsScreen> {
   void _changePort(int port) {
     _serverPort = port;
     FilmServerInterface.changePort(_serverPort);
+  }
+
+  List<Widget> _buildThemeSquares() {
+    List<Widget> res = [];
+    final themes = DynamicTheme.of(context).dynamicThemes;
+    for (int i = 0; i < themes.length; i++) {
+      res.add(GestureDetector(
+          onTap: () => DynamicTheme.of(context).setTheme(i),
+          child: Stack(alignment: Alignment.center, children: <Widget>[
+            Container(
+              decoration: i == DynamicTheme.currentThemeIndex
+                  ? BoxDecoration(
+                      border: Border.all(width: 3.0), color: themes[i].primaryColor)
+                  : null,
+              margin: EdgeInsets.all(5.0),
+              height: 60.0,
+              width: 60.0,
+              color: i != DynamicTheme.currentThemeIndex
+                  ? themes[i].primaryColor
+                  : null,
+            ),
+          ] + (i == DynamicTheme.currentThemeIndex ? [Icon(Icons.check)] : [])
+          )));
+    }
+    return res;
   }
 }
