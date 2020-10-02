@@ -93,7 +93,7 @@ class _FilmListState extends State<FilmList> {
     _path.forEach((p) => {
           if (subtree != null)
             {
-              subtree = _films.folders
+              subtree = subtree.folders
                   .firstWhere((folder) => folder.path == p, orElse: () => null)
             }
         });
