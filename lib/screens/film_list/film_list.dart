@@ -42,8 +42,7 @@ class _FilmListState extends State<FilmList> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     final Connectivity _connectivity = new Connectivity();
-    _streamSubscription =
-        _connectivity.onConnectivityChanged.listen((connectivityResult) {
+    _streamSubscription = _connectivity.onConnectivityChanged.listen((connectivityResult) {
       setState(() {
         _connectivityResult = connectivityResult;
       });
@@ -72,14 +71,12 @@ class _FilmListState extends State<FilmList> {
               ),
               IconButton(
                 icon: Icon(Icons.settings),
-                onPressed: () =>
-                    Navigator.pushNamed(context, OptionsScreen.routeName),
+                onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
               )
             ],
           ),
           body: CustomProgress(
-              hasError: _connectivityResult != ConnectivityResult.wifi ||
-                  _loadingError != '',
+              hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
               loadingText: 'Recupero i film...',
               isLoading: _loadingFilms,
               errorChild: _buildErrorWidget(),
@@ -91,11 +88,7 @@ class _FilmListState extends State<FilmList> {
   Widget _buildFilmList() {
     FilmFolderClass subtree = _films;
     _path.forEach((p) => {
-          if (subtree != null)
-            {
-              subtree = subtree.folders
-                  .firstWhere((folder) => folder.path == p, orElse: () => null)
-            }
+          if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
         });
     if (subtree == null) {
       subtree = new FilmFolderClass(path: '', folders: [], films: []);
@@ -110,14 +103,11 @@ class _FilmListState extends State<FilmList> {
                 .asMap()
                 .entries
                 .map((entry) => BreadCrumbItem(
-                    content: Text(entry.value,
-                        style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold)),
+                    content: Text(entry.value, style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                     onTap: () => _handleBreacrumbTap(entry.key)))
                 .toList(),
             divider: Icon(Icons.chevron_right, color: Colors.orange),
-            overflow: WrapOverflow(
-                direction: Axis.horizontal, keepLastDivider: false),
+            overflow: WrapOverflow(direction: Axis.horizontal, keepLastDivider: false),
           ),
         ),
         Expanded(
@@ -130,9 +120,7 @@ class _FilmListState extends State<FilmList> {
             children: (subtree.films.map<Widget>((film) {
                       return ListTile(
                         title: Text(film.title),
-                        leading: Icon(Icons.movie,
-                            color:
-                                film.isSupported() ? Colors.green : Colors.red),
+                        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
                         onTap: () => _handleFilmTap(film),
                       );
                     }).toList() +
@@ -152,7 +140,7 @@ class _FilmListState extends State<FilmList> {
   }
 
   /// Chiede la lista dei film al server
-  void _loadFilms(bool requestReload) {
+  Future<void> _loadFilms(bool requestReload) {
     if (!_alreadyCheckingForUpdates && !_skipUpdate) {
       _checkForUpdates();
     }
@@ -162,9 +150,7 @@ class _FilmListState extends State<FilmList> {
       _path.length = 0;
       _loadingError = '';
     });
-    Future<FilmFolderClass> httpCall = requestReload
-        ? FilmServerInterface.reloadFilmDirectory()
-        : FilmServerInterface.getFilms();
+    Future<FilmFolderClass> httpCall = requestReload ? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
     httpCall.then((films) {
       setState(() {
         _loadingFilms = false;
@@ -177,6 +163,8 @@ class _FilmListState extends State<FilmList> {
         _loadingError = err.toString();
       });
     });
+
+    return httpCall;
   }
 
   Future<bool> _onBackPressed() {
@@ -207,8 +195,7 @@ class _FilmListState extends State<FilmList> {
 
   void _handleFilmTap(FilmClass film) {
     final String fullPath = '${_path.join('/')}/${film.title}';
-    Navigator.pushNamed(context, InspectFilmArgument.routeName,
-        arguments: InspectFilmArgument(film: film, fullPath: fullPath));
+    Navigator.pushNamed(context, InspectFilmArgument.routeName, arguments: InspectFilmArgument(film: film, fullPath: fullPath));
   }
 
   void _handleFolderTap(FilmFolderClass folder) {
@@ -237,19 +224,12 @@ class _FilmListState extends State<FilmList> {
               _connectivityResult != ConnectivityResult.wifi
                   ? 'Non sei connesso al Wi-Fi'
                   : 'Il server è spento o ha rifiutato la connessione',
-              style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold),
+              style: TextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
               padding: EdgeInsets.only(top: 30.0),
-              child: Icon(
-                  _connectivityResult != ConnectivityResult.wifi
-                      ? Icons.signal_wifi_off
-                      : Icons.cloud_off,
-                  size: 100.0),
+              child: Icon(_connectivityResult != ConnectivityResult.wifi ? Icons.signal_wifi_off : Icons.cloud_off, size: 100.0),
             )
           ],
         ));
@@ -263,8 +243,7 @@ class _FilmListState extends State<FilmList> {
             context: context,
             barrierDismissible: false,
             child: AlertDialog(
-              title: Text(
-                  "E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
+              title: Text("E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
               actions: [
                 FlatButton(
                   child: Text('Sì'),
