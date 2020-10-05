@@ -117,18 +117,18 @@ class _FilmListState extends State<FilmList> {
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             controller: ScrollController(keepScrollOffset: true),
-            children: (subtree.films.map<Widget>((film) {
-                      return ListTile(
-                        title: Text(film.title),
-                        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
-                        onTap: () => _handleFilmTap(film),
-                      );
-                    }).toList() +
-                    (subtree.folders.map<Widget>((folder) {
+            children: (subtree.folders.map<Widget>((folder) {
                       return ListTile(
                         title: Text(folder.path),
                         leading: Icon(Icons.folder),
                         onTap: () => _handleFolderTap(folder),
+                      );
+                    }).toList() +
+                    (subtree.films.map<Widget>((film) {
+                      return ListTile(
+                        title: Text(film.title),
+                        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
+                        onTap: () => _handleFilmTap(film),
                       );
                     }).toList()))
                 .expand((element) => [element, Divider()])
