@@ -68,7 +68,7 @@ class FilmServerInterface {
   static Future<FilmFolderClass> reloadFilmDirectory() async {
     final url = await _url;
     final response = await http.get('$url/realoadDir')
-        .catchError((err){return http.Response('', 404);});;
+        .catchError((err){return http.Response('', 404);});
     if (response.statusCode == 200) {
       return FilmFolderClass.fromJson(json.decode(response.body));
     } else {
@@ -119,7 +119,7 @@ class FilmServerInterface {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final url = await _url;
     final response = await http.get('$url/appVersion')
-        .catchError((err){return http.Response('', 404);});;
+        .catchError((err){return http.Response('', 404);});
     if (response.statusCode == 200) {
       return int.parse(packageInfo.buildNumber) < json.decode(response.body);
     } else {

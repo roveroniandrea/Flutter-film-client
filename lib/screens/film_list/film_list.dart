@@ -117,6 +117,7 @@ class _FilmListState extends State<FilmList> {
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             controller: ScrollController(keepScrollOffset: true),
+            physics: BouncingScrollPhysics(),
             children: (subtree.folders.map<Widget>((folder) {
                       return ListTile(
                         title: Text(folder.path),
