@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:film_client/components/custom_progress.dart';
+import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_folder_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
@@ -106,7 +107,7 @@ class _FilmListState extends State<FilmList> {
                     content: Text(entry.value, style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                     onTap: () => _handleBreacrumbTap(entry.key)))
                 .toList(),
-            divider: Icon(Icons.chevron_right, color: Colors.orange),
+            divider: Icon(Icons.chevron_right, color: DynamicTheme.of(context).convertTheme().primaryColor),
             overflow: WrapOverflow(direction: Axis.horizontal, keepLastDivider: false),
           ),
         ),
@@ -123,6 +124,7 @@ class _FilmListState extends State<FilmList> {
                         title: Text(folder.path),
                         leading: Icon(Icons.folder),
                         onTap: () => _handleFolderTap(folder),
+                        visualDensity: VisualDensity.comfortable,
                       );
                     }).toList() +
                     (subtree.films.map<Widget>((film) {
@@ -130,6 +132,7 @@ class _FilmListState extends State<FilmList> {
                         title: Text(film.title),
                         leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
                         onTap: () => _handleFilmTap(film),
+                        visualDensity: VisualDensity.comfortable,
                       );
                     }).toList()))
                 .expand((element) => [element, Divider()])
@@ -225,7 +228,7 @@ class _FilmListState extends State<FilmList> {
               _connectivityResult != ConnectivityResult.wifi
                   ? 'Non sei connesso al Wi-Fi'
                   : 'Il server è spento o ha rifiutato la connessione',
-              style: TextStyle(color: Colors.red, fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(

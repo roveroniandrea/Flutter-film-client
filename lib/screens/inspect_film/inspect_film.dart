@@ -1,4 +1,5 @@
 import 'package:film_client/components/custom_progress.dart';
+import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/components/restarting_server_dialog.dart';
 import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/film_class.dart';
@@ -130,7 +131,7 @@ class _InspectFilmState extends State<InspectFilm> {
                   child: Text(
                     'Impossibile trasmettere il film:\n\n${_film.notSupportedReason()}',
                     style: TextStyle(
-                        color: Colors.red,
+                        color: DynamicTheme.of(context).convertTheme().errorColor,
                         fontSize: 20.0,
                         fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,

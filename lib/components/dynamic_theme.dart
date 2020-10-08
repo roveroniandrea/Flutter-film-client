@@ -60,7 +60,7 @@ class _DynamicThemeState extends State<DynamicTheme> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Film Client',
-      theme: _convertTheme(),
+      theme: convertTheme(),
       initialRoute: '/',
       routes: {
         '/': (context) => FilmList(),
@@ -71,7 +71,7 @@ class _DynamicThemeState extends State<DynamicTheme> {
     );
   }
 
-  ThemeData _convertTheme() {
+  ThemeData convertTheme() {
     DynamicThemeData theme = dynamicThemes[DynamicTheme.currentThemeIndex];
     return ThemeData(
         primaryColor: theme.primaryColor,
