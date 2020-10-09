@@ -158,11 +158,12 @@ class _FilmListState extends State<FilmList> {
           child: AlertDialog(
             title: Text("Vuoi uscire dall'app?"),
             actions: [
-              FlatButton(
-                child: Text('Sì'),
+              TextButton.icon(
+                icon: Icon(Icons.exit_to_app),
+                label: Text('Sì',),
                 onPressed: () => Navigator.of(context).pop(true),
               ),
-              FlatButton(
+              TextButton(
                 child: Text('No'),
                 onPressed: () => Navigator.of(context).pop(false),
               ),
@@ -195,6 +196,7 @@ class _FilmListState extends State<FilmList> {
   /// Crea il widget per l'errore di connessione
   Widget _buildErrorWidget() {
     return Container(
+        width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.only(top: 100.0),
         child: Column(
           children: [
@@ -207,7 +209,7 @@ class _FilmListState extends State<FilmList> {
             ),
             Container(
               padding: EdgeInsets.only(top: 30.0),
-              child: Icon(_connectivityResult != ConnectivityResult.wifi ? Icons.signal_wifi_off : Icons.cloud_off, size: 100.0),
+              child: Icon(_connectivityResult != ConnectivityResult.wifi ? Icons.wifi_off : Icons.cloud_off, size: 100.0),
             )
           ],
         ));
@@ -223,11 +225,12 @@ class _FilmListState extends State<FilmList> {
             child: AlertDialog(
               title: Text("E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
               actions: [
-                FlatButton(
-                  child: Text('Sì'),
+                TextButton.icon(
+                  icon: Icon(Icons.get_app),
+                  label: Text('Sì'),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
-                FlatButton(
+                TextButton(
                   child: Text('No'),
                   onPressed: () => Navigator.of(context).pop(false),
                 ),

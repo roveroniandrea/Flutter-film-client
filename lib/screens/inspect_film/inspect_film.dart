@@ -26,8 +26,7 @@ class _InspectFilmState extends State<InspectFilm> {
     super.initState();
     Future.delayed(Duration.zero, () {
       setState(() {
-        final InspectFilmArgument arg =
-            ModalRoute.of(context).settings.arguments;
+        final InspectFilmArgument arg = ModalRoute.of(context).settings.arguments;
         _film = arg.film;
         _fullPath = arg.fullPath;
       });
@@ -39,7 +38,7 @@ class _InspectFilmState extends State<InspectFilm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Trasmetti film'),
+        title: Text('Trasmetti il film'),
       ),
       body: Builder(
         builder: (context) {
@@ -57,7 +56,7 @@ class _InspectFilmState extends State<InspectFilm> {
               Container(
                 padding: EdgeInsets.all(20.0),
                 child: Text(
-                  'Dove vuoi guardare\n"${_film.humanTitle}"?',
+                  'Dove vuoi guardare\n"${_film.humanTitle}" ?',
                   style: TextStyle(fontSize: 25.0),
                   textAlign: TextAlign.center,
                 ),
@@ -76,7 +75,7 @@ class _InspectFilmState extends State<InspectFilm> {
         ? [
             Container(
               padding: EdgeInsets.all(20.0),
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: Text('Guarda sul telefono'),
                 onPressed: _handleGuardaSuTelefono,
               ),
@@ -90,9 +89,7 @@ class _InspectFilmState extends State<InspectFilm> {
             [
               CustomProgress(
                 isLoading: _transmittingOnChromecast || _searchingChromecasts,
-                loadingText: _transmittingOnChromecast
-                    ? 'Trasmissione in corso...'
-                    : 'Recupero i Chromecast...',
+                loadingText: _transmittingOnChromecast ? 'Trasmissione in corso...' : 'Recupero i Chromecast...',
                 hasError: !_film.isSupported(),
                 child: Column(children: [
                   Column(
@@ -102,12 +99,11 @@ class _InspectFilmState extends State<InspectFilm> {
                           child: ButtonBar(
                             alignment: MainAxisAlignment.spaceAround,
                             children: _chromecasts
-                                .map(
-                                  (chromecast) => RaisedButton(
-                                    child: Text(chromecast),
-                                    onPressed: () => _handleCast(chromecast),
-                                  ),
-                                )
+                                .map((chromecast) => ElevatedButton.icon(
+                                      icon: Icon(Icons.cast),
+                                      label: Text(chromecast),
+                                      onPressed: () => _handleCast(chromecast),
+                                    ))
                                 .toList(),
                           )),
                       Container(
@@ -117,10 +113,8 @@ class _InspectFilmState extends State<InspectFilm> {
                           style: TextStyle(fontSize: 20.0),
                         ),
                       ),
-                      RaisedButton(
-                        child: Text(
-                          'Trova dispositivi',
-                        ),
+                      ElevatedButton(
+                        child: Text('Trova dispositivi'),
                         onPressed: () => _loadChomecasts(),
                       )
                     ],
@@ -130,10 +124,8 @@ class _InspectFilmState extends State<InspectFilm> {
                   padding: EdgeInsets.only(top: 100.0),
                   child: Text(
                     'Impossibile trasmettere il film:\n\n${_film.notSupportedReason()}',
-                    style: TextStyle(
-                        color: DynamicTheme.of(context).convertTheme().errorColor,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -162,8 +154,7 @@ class _InspectFilmState extends State<InspectFilm> {
   }
 
   void _handleGuardaSuTelefono() {
-    Navigator.pushNamed(context, CastLocalArgument.routeName,
-        arguments: CastLocalArgument(film: _film, fullPath: _fullPath));
+    Navigator.pushNamed(context, CastLocalArgument.routeName, arguments: CastLocalArgument(film: _film, fullPath: _fullPath));
   }
 
   void _handleCast(String chromecast) {
@@ -180,9 +171,7 @@ class _InspectFilmState extends State<InspectFilm> {
         Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
             content: Container(
               child: Text(
-                castResult == CastResult.Done
-                    ? 'Trasmissione avvenuta!'
-                    : 'Errore in trasmissione',
+                castResult == CastResult.Done ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
                 style: TextStyle(fontSize: 20.0),
               ),
               padding: EdgeInsets.all(6.0),
@@ -195,8 +184,7 @@ class _InspectFilmState extends State<InspectFilm> {
               return RestartingServerDialog();
             });
 
-        Future.delayed(FilmServerInterface.timeToRestart)
-            .then((_) {
+        Future.delayed(FilmServerInterface.timeToRestart).then((_) {
           Navigator.of(context).pop(true);
           _handleCast(chromecast);
         });
