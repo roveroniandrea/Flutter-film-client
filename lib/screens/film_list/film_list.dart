@@ -36,6 +36,9 @@ class _FilmListState extends State<FilmList> {
   bool _skipUpdate = false;
   bool _alreadyCheckingForUpdates = false;
 
+  bool _isSearching = false;
+  String _searchPattern = '';
+
   @override
   void initState() {
     super.initState();
@@ -63,37 +66,19 @@ class _FilmListState extends State<FilmList> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-          appBar: AppBar(
-            title: Text('Lista dei film'),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.refresh),
-                onPressed: () => _loadFilms(true),
-              ),
-              IconButton(
-                icon: Icon(Icons.settings),
-                onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
-              )
-            ],
-          ),
-          body: CustomProgress(
-              hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
-              loadingText: 'Recupero i film...',
-              isLoading: _loadingFilms,
-              errorChild: _buildErrorWidget(),
-              child: _buildFilmList())),
+        appBar: _buildAppBar(),
+        body: CustomProgress(
+            hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
+            loadingText: 'Recupero i film...',
+            isLoading: _loadingFilms,
+            errorChild: _buildErrorWidget(),
+            child: _buildFilmList()),
+      ),
       onWillPop: _onBackPressed,
     );
   }
 
   Widget _buildFilmList() {
-    FilmFolderClass subtree = _films;
-    _path.forEach((p) => {
-          if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
-        });
-    if (subtree == null) {
-      subtree = new FilmFolderClass(path: '', folders: [], films: []);
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,31 +98,13 @@ class _FilmListState extends State<FilmList> {
         ),
         Expanded(
           child: ListView(
-            key: PageStorageKey<String>('list${_path.length}'),
-            padding: EdgeInsets.all(16.0),
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            controller: ScrollController(keepScrollOffset: true),
-            physics: BouncingScrollPhysics(),
-            children: (subtree.folders.map<Widget>((folder) {
-                      return ListTile(
-                        title: Text(folder.path),
-                        leading: Icon(Icons.folder),
-                        onTap: () => _handleFolderTap(folder),
-                        visualDensity: VisualDensity.comfortable,
-                      );
-                    }).toList() +
-                    (subtree.films.map<Widget>((film) {
-                      return ListTile(
-                        title: Text(film.title),
-                        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
-                        onTap: () => _handleFilmTap(film),
-                        visualDensity: VisualDensity.comfortable,
-                      );
-                    }).toList()))
-                .expand((element) => [element, Divider()])
-                .toList(),
-          ),
+              key: PageStorageKey<String>('list${_path.length}'),
+              padding: EdgeInsets.all(16.0),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              controller: ScrollController(keepScrollOffset: true),
+              physics: BouncingScrollPhysics(),
+              children: _buildListTiles()),
         )
       ],
     );
@@ -172,6 +139,13 @@ class _FilmListState extends State<FilmList> {
   }
 
   Future<bool> _onBackPressed() {
+    if (_isSearching) {
+      setState(() {
+        _isSearching = false;
+      });
+      return Future.value(false);
+    }
+
     if (_path.length > 0) {
       setState(() {
         _path.removeLast();
@@ -270,5 +244,121 @@ class _FilmListState extends State<FilmList> {
         });
       }
     }, onError: (err) => {});
+  }
+
+  AppBar _buildAppBar() {
+    if (!_isSearching) {
+      return AppBar(
+        title: Text('Lista dei film'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            tooltip: "Cerca un film",
+            onPressed: () {
+              setState(() {
+                _isSearching = true;
+                _searchPattern = '';
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => _loadFilms(true),
+            tooltip: "Ricarica i film",
+          ),
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
+            tooltip: "Vai alle opzioni",
+          )
+        ],
+      );
+    } else {
+      return AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              _isSearching = false;
+            });
+          },
+        ),
+        title: TextField(
+          decoration: InputDecoration(
+            hintText: "Cerca un film",
+            border: InputBorder.none,
+          ),
+          autofocus: true,
+          style: TextStyle(fontSize: 20.0),
+          onChanged: (value) {
+            setState(() {
+              _searchPattern = value;
+            });
+          },
+        ),
+      );
+    }
+  }
+
+  List<Widget> _buildListTiles() {
+    FilmFolderClass subtree = _films;
+    _path.forEach((p) => {
+          if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
+        });
+    if (subtree == null) {
+      subtree = new FilmFolderClass(path: '', folders: [], films: []);
+    }
+
+    final tiles = _mapFolders(subtree)
+        .map<Widget>((folder) {
+          return ListTile(
+            title: Text(folder.path),
+            leading: Icon(Icons.folder),
+            onTap: () => _handleFolderTap(folder),
+            visualDensity: VisualDensity.comfortable,
+          );
+        })
+        .followedBy(_mapFilms(subtree).map<Widget>((film) {
+          return ListTile(
+            title: Text(film.title),
+            leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
+            onTap: () => _handleFilmTap(film),
+            visualDensity: VisualDensity.comfortable,
+          );
+        }))
+        .expand((element) => [element, Divider()])
+        .toList();
+
+    if (tiles.length > 0)
+      return tiles;
+    else {
+      return [
+        Container(
+          padding: EdgeInsets.only(top: 50),
+          alignment: Alignment.center,
+          child: Text(
+            _isSearching ? "Nessun film in questa cartella soddisfa la ricerca" : "Questa cartella è vuota",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        )
+      ];
+    }
+  }
+
+  List<FilmFolderClass> _mapFolders(FilmFolderClass subtree) {
+    if (_isSearching && _searchPattern != '') {
+      return subtree.folders.where((folder) => folder.matchesPattern(_searchPattern)).toList();
+    } else {
+      return subtree.folders;
+    }
+  }
+
+  List<FilmClass> _mapFilms(FilmFolderClass subtree) {
+    if (_isSearching && _searchPattern != '') {
+      return subtree.films.where((film) => film.matchesPattern(_searchPattern)).toList();
+    } else {
+      return subtree.films;
+    }
   }
 }

@@ -1,17 +1,21 @@
 class FilmClass {
   static final _supportedFormats = ['.mp4', '.m4v'];
 
-  String title = '';
-  String humanTitle = '';
+  String _title = '';
+  String get title => _title;
+  String _humanTitle = '';
+  String get humanTitle => _humanTitle;
   String _format = '';
 
-  FilmClass({this.title}) {
+
+  FilmClass({String title}) {
+    _title = title;
     final latestDot = title.lastIndexOf('.');
     if (latestDot > -1) {
       _format = title.substring(latestDot);
-      humanTitle = title.substring(0, latestDot);
+      _humanTitle = title.substring(0, latestDot);
     } else {
-      humanTitle = title;
+      _humanTitle = title;
     }
   }
 
@@ -35,5 +39,9 @@ class FilmClass {
         return 'Errore sconosciuto';
       }
     }
+  }
+
+  bool matchesPattern(String pattern){
+    return _title.contains(pattern);
   }
 }
