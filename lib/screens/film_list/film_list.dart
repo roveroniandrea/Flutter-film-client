@@ -319,6 +319,7 @@ class _FilmListState extends State<FilmList> {
             leading: Icon(Icons.folder),
             onTap: () => _handleFolderTap(folder),
             visualDensity: VisualDensity.comfortable,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           );
         })
         .followedBy(_mapFilms(subtree).map<Widget>((film) {
@@ -327,6 +328,7 @@ class _FilmListState extends State<FilmList> {
             leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
             onTap: () => _handleFilmTap(film),
             visualDensity: VisualDensity.comfortable,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           );
         }))
         .expand((element) => [element, Divider()])
