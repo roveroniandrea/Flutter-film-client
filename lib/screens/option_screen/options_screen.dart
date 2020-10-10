@@ -106,16 +106,14 @@ class _OptionsScreenState extends State<OptionsScreen> {
   }
 
   void _loadSettings() {
-    FilmServerInterface.ipServer.then((ip) {
-      setState(() {
-        _serverIp = ip;
-      });
+    final ip = FilmServerInterface.ip;
+    setState(() {
+      _serverIp = ip;
     });
 
-    FilmServerInterface.portServer.then((port) {
-      setState(() {
-        _serverPort = port;
-      });
+    final port = FilmServerInterface.port;
+    setState(() {
+      _serverPort = port;
     });
   }
 

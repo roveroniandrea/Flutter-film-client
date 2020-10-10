@@ -1,12 +1,17 @@
+/// Definisce un singolo film
 class FilmClass {
+  /// Formati supportati
   static final _supportedFormats = ['.mp4', '.m4v'];
-
+  /// Titolo del film compresa l'estensione
   String _title = '';
+  /// Titolo del film compresa l'estensione
   String get title => _title;
+  /// Titolo del film esclusa l'estensione
   String _humanTitle = '';
+  /// Titolo del film esclusa l'estensione
   String get humanTitle => _humanTitle;
+  /// Estensione del film
   String _format = '';
-
 
   FilmClass({String title}) {
     _title = title;
@@ -19,16 +24,14 @@ class FilmClass {
     }
   }
 
+  /// Ritorna [true] se l'estensione del film è tra quelle supportate
   bool isSupported() {
     return _format != '' &&
         _supportedFormats.contains(_format) &&
         !title.contains("'");
   }
 
-  String getFormat() {
-    return _format;
-  }
-
+  /// Ritorna il motivo per cui il film non è supportato
   String notSupportedReason() {
     if (!_supportedFormats.contains(_format)) {
       return 'Formato $_format non supportato';
@@ -41,7 +44,10 @@ class FilmClass {
     }
   }
 
+  /// Ritorna [true] se il pattern è presente all'interno del titolo del film
+  ///
+  /// La ricerca viene effettuata in lowercase per entrambe le stringhe e comprende anche l'estensione del film
   bool matchesPattern(String pattern){
-    return _title.contains(pattern);
+    return _title.toLowerCase().contains(pattern.toLowerCase());
   }
 }

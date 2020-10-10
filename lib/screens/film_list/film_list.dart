@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:connectivity/connectivity.dart';
 import 'package:film_client/components/custom_progress.dart';
 import 'package:film_client/components/dynamic_theme.dart';
@@ -12,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 
+/// Screen per visualizzare l'elenco dei film e sottocartelle
 class FilmList extends StatefulWidget {
   @override
   _FilmListState createState() => _FilmListState();
@@ -30,21 +30,32 @@ class _FilmListState extends State<FilmList> {
   /// diverso da '' se c'è stato un errore nella richiesta dei film
   String _loadingError = '';
 
+  /// Indica lo stato della connessione, se assente, dati o wifi
   ConnectivityResult _connectivityResult = ConnectivityResult.wifi;
+
+  /// Listener per il cambio di connessione
   StreamSubscription<ConnectivityResult> _streamSubscription;
 
+  /// Settato a [true] se l'utente non vuole aggiornare l'app
   bool _skipUpdate = false;
+
+  /// Indica se sto attualmente cercando se ci sono aggiornamenti
   bool _alreadyCheckingForUpdates = false;
 
+  /// Indica se sto effettuando la ricerca per nome dei film
   bool _isSearching = false;
+
+  /// Stringa con il nome del film che sto cercando
   String _searchPattern = '';
 
   @override
   void initState() {
     super.initState();
 
+    // L'unico orientamento ammesso è il portrait up
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+    // Ascolto per cambi di connessione
     final Connectivity _connectivity = new Connectivity();
     _streamSubscription = _connectivity.onConnectivityChanged.listen((connectivityResult) {
       setState(() {
@@ -59,6 +70,7 @@ class _FilmListState extends State<FilmList> {
   @override
   void dispose() {
     super.dispose();
+    // Cancello il listener al cambio di connessione
     _streamSubscription.cancel();
   }
 
@@ -78,6 +90,7 @@ class _FilmListState extends State<FilmList> {
     );
   }
 
+  /// Crea il widget per mostare i film in elenco
   Widget _buildFilmList() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,9 +123,10 @@ class _FilmListState extends State<FilmList> {
     );
   }
 
-  /// Chiede la lista dei film al server
-  Future<void> _loadFilms(bool requestReload) {
+  /// Chiede la lista dei film al server e controlla (se possibile) se c'è un aggioramento dell'app
+  void _loadFilms(bool requestReload) {
     if (!_alreadyCheckingForUpdates && !_skipUpdate) {
+      // Controllo anche se ci sono aggiornameti
       _checkForUpdates();
     }
 
@@ -121,6 +135,8 @@ class _FilmListState extends State<FilmList> {
       _path.length = 0;
       _loadingError = '';
     });
+
+    // Chiamata al server
     Future<FilmFolderClass> httpCall = requestReload ? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
     httpCall.then((films) {
       setState(() {
@@ -134,12 +150,20 @@ class _FilmListState extends State<FilmList> {
         _loadingError = err.toString();
       });
     });
-
-    return httpCall;
   }
 
+  /// Gestisce l'azione dell'utente di back button
+  ///
+  /// Ordine di azioni:
+  ///
+  /// 1- Esco dalla ricerca
+  ///
+  /// 2- Torno indietro di una cartella
+  ///
+  /// 3- Chiedo se voglio uscire dall'app
   Future<bool> _onBackPressed() {
     if (_isSearching) {
+      // Prima possibilità esco dalla ricerca film
       setState(() {
         _isSearching = false;
       });
@@ -147,11 +171,13 @@ class _FilmListState extends State<FilmList> {
     }
 
     if (_path.length > 0) {
+      // Seconda possibilità salgo di una cartella
       setState(() {
         _path.removeLast();
       });
       return Future.value(false);
     } else {
+      // Terza possibilità chiedo se voglio uscire dall'app
       return showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -160,7 +186,9 @@ class _FilmListState extends State<FilmList> {
             actions: [
               TextButton.icon(
                 icon: Icon(Icons.exit_to_app),
-                label: Text('Sì',),
+                label: Text(
+                  'Sì',
+                ),
                 onPressed: () => Navigator.of(context).pop(true),
               ),
               TextButton(
@@ -172,11 +200,14 @@ class _FilmListState extends State<FilmList> {
     }
   }
 
+  /// Gestisce il clic su un film
   void _handleFilmTap(FilmClass film) {
     final String fullPath = '${_path.join('/')}/${film.title}';
+    // Nuova rotta ad InspectFilm
     Navigator.pushNamed(context, InspectFilmArgument.routeName, arguments: InspectFilmArgument(film: film, fullPath: fullPath));
   }
 
+  /// Gestisce il clic su una cartella
   void _handleFolderTap(FilmFolderClass folder) {
     setState(() {
       _path.add(folder.path);
@@ -184,7 +215,7 @@ class _FilmListState extends State<FilmList> {
   }
 
   /// Gestisce il tap su un elemento del breadcrumb.
-  /// @param pathLength index dell'elemento cliccato (0- based)
+  /// [pathLength] è l'index dell'elemento cliccato (0- based)
   void _handleBreacrumbTap(int pathLength) {
     if (_path.length != pathLength) {
       setState(() {
@@ -215,6 +246,9 @@ class _FilmListState extends State<FilmList> {
         ));
   }
 
+  /// Controlla se ci sono aggiornamenti disponibili
+  ///
+  /// Se è disponibile un aggiornamento chiede all'utente se vuole essere reindirizzato alla pagina web del browser
   void _checkForUpdates() async {
     _alreadyCheckingForUpdates = true;
     FilmServerInterface.checkForUpdates().then((updateAvailable) {
@@ -249,6 +283,7 @@ class _FilmListState extends State<FilmList> {
     }, onError: (err) => {});
   }
 
+  /// Crea l'appBar con eventuale campo di input per cercare i film
   AppBar _buildAppBar() {
     if (!_isSearching) {
       return AppBar(
@@ -303,6 +338,7 @@ class _FilmListState extends State<FilmList> {
     }
   }
 
+  /// Crea i tiles per i film e le cartelle. Separa i tile da un Divider
   List<Widget> _buildListTiles() {
     FilmFolderClass subtree = _films;
     _path.forEach((p) => {
@@ -351,6 +387,7 @@ class _FilmListState extends State<FilmList> {
     }
   }
 
+  /// Ritorna le sottocartelle da visulizzare nel caso stia effettuando una ricerca
   List<FilmFolderClass> _mapFolders(FilmFolderClass subtree) {
     if (_isSearching && _searchPattern != '') {
       return subtree.folders.where((folder) => folder.matchesPattern(_searchPattern)).toList();
@@ -359,6 +396,7 @@ class _FilmListState extends State<FilmList> {
     }
   }
 
+  /// Ritorna i film da visulizzare nel caso stia effettuando una ricerca
   List<FilmClass> _mapFilms(FilmFolderClass subtree) {
     if (_isSearching && _searchPattern != '') {
       return subtree.films.where((film) => film.matchesPattern(_searchPattern)).toList();
