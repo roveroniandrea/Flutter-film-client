@@ -325,9 +325,10 @@ class _FilmListState extends State<FilmList> {
           decoration: InputDecoration(
             hintText: "Cerca un film",
             border: InputBorder.none,
+            hintStyle: TextStyle(color: DynamicTheme.of(context).convertTheme().primaryTextTheme.caption.color)
           ),
           autofocus: true,
-          style: TextStyle(fontSize: 20.0),
+          style: TextStyle(fontSize: 20.0, color: DynamicTheme.of(context).convertTheme().primaryTextTheme.bodyText1.color),
           onChanged: (value) {
             setState(() {
               _searchPattern = value;
