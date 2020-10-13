@@ -234,7 +234,7 @@ class _FilmListState extends State<FilmList> {
             Text(
               _connectivityResult != ConnectivityResult.wifi
                   ? 'Non sei connesso al Wi-Fi'
-                  : 'Il server è spento o ha rifiutato la connessione',
+                  : 'Il server è spento',
               style: TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

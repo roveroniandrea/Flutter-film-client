@@ -41,8 +41,8 @@ class DynamicTheme extends StatefulWidget {
     await Future.delayed(Duration(seconds: 1));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _currentThemeIndex = prefs.getInt(SharedPreferencesKeys.THEME_INDEX) ?? 7;
-    _isLightTheme =
-        prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ?? SchedulerBinding.instance.window.platformBrightness == Brightness.light;
+    _isLightTheme = prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ??
+        SchedulerBinding.instance.window.platformBrightness == Brightness.light;
   }
 
   /// Chiamato dal widget stesso
@@ -77,7 +77,8 @@ class _DynamicThemeState extends State<DynamicTheme> {
     // Creo la lista dei temi
     _dynamicThemes.clear();
     for (int i = 0; i < 16; i++) {
-      _dynamicThemes.add(DynamicThemeData(Colors.primaries[i], Colors.accents[i]));
+      _dynamicThemes
+          .add(DynamicThemeData(Colors.primaries[i], Colors.accents[i]));
     }
   }
 
@@ -102,7 +103,8 @@ class _DynamicThemeState extends State<DynamicTheme> {
     return ThemeData(
         primaryColor: theme.primaryColor,
         accentColor: theme.accentColor,
-        brightness: DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark);
+        brightness:
+            DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark);
   }
 
   /// Salva in locale e visualizza un nuovo tema

@@ -144,8 +144,6 @@ class _InspectFilmState extends State<InspectFilm> {
         _chromecasts = chromecasts;
       });
     }, onError: (err) {
-      // TODO
-      print(err.toString());
       setState(() {
         _searchingChromecasts = false;
         _chromecasts = [];
