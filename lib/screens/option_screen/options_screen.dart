@@ -2,6 +2,7 @@ import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/models/film_server_interface.dart';
 import 'package:flutter/material.dart';
 
+/// Screen per settare le impostazioni del server
 class OptionsScreen extends StatefulWidget {
   static final routeName = '/options';
 
@@ -10,9 +11,13 @@ class OptionsScreen extends StatefulWidget {
 }
 
 class _OptionsScreenState extends State<OptionsScreen> {
+  /// Stile del titolo di ogni opzione
   final TextStyle _textStyle = TextStyle(fontSize: 20.0);
 
+  /// Indirizzo ip del server espresso come array di 4 stringhe
   List<String> _serverIp = [];
+
+  /// Numero di porta del server
   int _serverPort;
 
   @override
@@ -105,6 +110,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
         ));
   }
 
+  /// Carica le impostazioni dal locale
   void _loadSettings() {
     final ip = FilmServerInterface.ip;
     setState(() {
@@ -117,16 +123,19 @@ class _OptionsScreenState extends State<OptionsScreen> {
     });
   }
 
+  /// Salva un nuovo indirizzo ip del server
   void _changeIp(int ipPosition, String ipNumber) {
     _serverIp[ipPosition] = ipNumber;
     FilmServerInterface.changeIp(_serverIp.join('.'));
   }
 
+  /// Cambia il numero di porta del server
   void _changePort(int port) {
     _serverPort = port;
     FilmServerInterface.changePort(_serverPort);
   }
 
+  /// Crea i quadrati per cambiare il tema dell'app
   List<Widget> _buildThemeSquares() {
     List<Widget> res = [];
     final themes = DynamicTheme.of(context).dynamicThemes;

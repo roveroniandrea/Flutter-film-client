@@ -8,22 +8,35 @@ import 'package:film_client/models/inspect_film_argument.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Screen per ispezionare un film e scegliere dove guardarlo
 class InspectFilm extends StatefulWidget {
   @override
   _InspectFilmState createState() => _InspectFilmState();
 }
 
 class _InspectFilmState extends State<InspectFilm> {
+  /// Lista dei chromecast disponibili
   List<String> _chromecasts = [];
+
+  /// Film da ispezionare
   FilmClass _film;
+
+  /// Percorso completo del film dalla cartella radice
   String _fullPath = '';
+
+  /// Se [true] indica che sta chiedendo di tramettere ad un chromecast
   bool _transmittingOnChromecast = false;
+
+  /// Se [false] indica che sta cercando i chromecast
   bool _searchingChromecasts = false;
+
+  /// Context utilizzato per mostrare lo snackbar
   BuildContext _scaffoldContext;
 
   @override
   void initState() {
     super.initState();
+    // Non posso modificare lo stato direttamente in initState
     Future.delayed(Duration.zero, () {
       setState(() {
         final InspectFilmArgument arg = ModalRoute.of(context).settings.arguments;
@@ -49,6 +62,7 @@ class _InspectFilmState extends State<InspectFilm> {
     );
   }
 
+  /// Crea il body della pagina
   Widget _buildBody() {
     return _film != null
         ? Column(
@@ -65,11 +79,15 @@ class _InspectFilmState extends State<InspectFilm> {
               _buildButtons()
             ],
           )
+        // Ritorno un widget vuoto per il primo frame perchè recupero gli argomenti della rotta
         : Column(
             children: [],
           );
   }
 
+  /// Crea il pulsante per guardare il film in locale e quelli per i chromecast
+  ///
+  /// Gestisce anche gli stati di loading e film non supportato
   Widget _buildButtons() {
     final List<Widget> castLocal = _film.isSupported()
         ? [
@@ -133,11 +151,13 @@ class _InspectFilmState extends State<InspectFilm> {
             ]);
   }
 
+  /// Carica i chromecast
   void _loadChomecasts() {
     setState(() {
       _searchingChromecasts = true;
       _chromecasts.length = 0;
     });
+
     FilmServerInterface.getChromecasts().then((chromecasts) {
       setState(() {
         _searchingChromecasts = false;
@@ -151,10 +171,15 @@ class _InspectFilmState extends State<InspectFilm> {
     });
   }
 
+  /// Passa alla rotta per guardare il film sul telefono
   void _handleGuardaSuTelefono() {
     Navigator.pushNamed(context, CastLocalArgument.routeName, arguments: CastLocalArgument(film: _film, fullPath: _fullPath));
   }
 
+  /// Inizia la trasmissione su un chromecast
+  ///
+  /// Gestisce anche il caso in cui il server risponda che si sta riavviando.
+  /// In questo caso ripete la richiesto dopo il tempo di attesa
   void _handleCast(String chromecast) {
     setState(() {
       _transmittingOnChromecast = true;
