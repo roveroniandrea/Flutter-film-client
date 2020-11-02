@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:animations/animations.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:film_client/components/custom_progress.dart';
 import 'package:film_client/components/dynamic_theme.dart';
@@ -23,6 +24,8 @@ class _FilmListState extends State<FilmList> {
 
   /// Percorso del breadcrumb
   final List<String> _path = [];
+
+  bool _isForward = true;
 
   /// true se sta chiedendo i film al server
   bool _loadingFilms = false;
@@ -110,14 +113,29 @@ class _FilmListState extends State<FilmList> {
           ),
         ),
         Expanded(
-          child: ListView(
-              key: PageStorageKey<String>('list${_path.length}'),
-              padding: EdgeInsets.all(16.0),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              controller: ScrollController(keepScrollOffset: true),
-              physics: BouncingScrollPhysics(),
-              children: _buildListTiles()),
+          child: PageTransitionSwitcher(
+            duration: const Duration(milliseconds: 500),
+            reverse: !_isForward,
+            transitionBuilder: (child, animation, secondaryAnimation) {
+              return SharedAxisTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                transitionType: SharedAxisTransitionType.horizontal,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: child,
+                ),
+              );
+            },
+            child: ListView(
+                key: PageStorageKey<String>('list${_path.length}'),
+                padding: EdgeInsets.all(16.0),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                controller: ScrollController(keepScrollOffset: true),
+                physics: BouncingScrollPhysics(),
+                children: _buildListTiles()),
+          ),
         )
       ],
     );
@@ -174,6 +192,7 @@ class _FilmListState extends State<FilmList> {
       // Seconda possibilità salgo di una cartella
       setState(() {
         _path.removeLast();
+        _isForward = false;
       });
       return Future.value(false);
     } else {
@@ -211,6 +230,7 @@ class _FilmListState extends State<FilmList> {
   void _handleFolderTap(FilmFolderClass folder) {
     setState(() {
       _path.add(folder.path);
+      _isForward = true;
     });
   }
 
@@ -219,6 +239,7 @@ class _FilmListState extends State<FilmList> {
   void _handleBreacrumbTap(int pathLength) {
     if (_path.length != pathLength) {
       setState(() {
+        _isForward = pathLength > _path.length;
         _path.length = pathLength;
       });
     }
@@ -232,9 +253,7 @@ class _FilmListState extends State<FilmList> {
         child: Column(
           children: [
             Text(
-              _connectivityResult != ConnectivityResult.wifi
-                  ? 'Non sei connesso al Wi-Fi'
-                  : 'Il server è spento',
+              _connectivityResult != ConnectivityResult.wifi ? 'Non sei connesso al Wi-Fi' : 'Il server è spento',
               style: TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -323,10 +342,9 @@ class _FilmListState extends State<FilmList> {
         ),
         title: TextField(
           decoration: InputDecoration(
-            hintText: "Cerca un film",
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: DynamicTheme.of(context).convertTheme().primaryTextTheme.caption.color)
-          ),
+              hintText: "Cerca un film",
+              border: InputBorder.none,
+              hintStyle: TextStyle(color: DynamicTheme.of(context).convertTheme().primaryTextTheme.caption.color)),
           autofocus: true,
           style: TextStyle(fontSize: 20.0, color: DynamicTheme.of(context).convertTheme().primaryTextTheme.bodyText1.color),
           onChanged: (value) {
