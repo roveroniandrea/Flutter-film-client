@@ -114,7 +114,7 @@ class _FilmListState extends State<FilmList> {
         ),
         Expanded(
           child: PageTransitionSwitcher(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 300),
             reverse: !_isForward,
             transitionBuilder: (child, animation, secondaryAnimation) {
               return SharedAxisTransition(
