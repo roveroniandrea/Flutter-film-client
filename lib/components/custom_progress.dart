@@ -21,6 +21,33 @@ class CustomProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: _buildWidget(),
+      switchInCurve: Curves.easeOutCirc,
+      switchOutCurve: Curves.easeInCirc,
+      layoutBuilder: (Widget currentChild, List<Widget> previousChildren) {
+        return Stack(
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+          alignment: Alignment.topCenter,
+        );
+      },
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          child: SlideTransition(
+            child: child,
+            position: Tween<Offset>(begin: Offset(-1,0), end: Offset(0, 0)).animate(animation),
+          ),
+          opacity: animation,
+        );
+      },
+    );
+  }
+
+  Widget _buildWidget() {
     if (hasError) {
       // In caso di errore mostro errorChild
       return errorChild;
@@ -28,24 +55,24 @@ class CustomProgress extends StatelessWidget {
     // Se isLoading mostro il testo di caricamento con un CircularProgressIndicator, altrimenti il child normale
     return isLoading
         ? Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  child: Text(loadingText, style: TextStyle(fontSize: 25.0)),
-                  padding: EdgeInsets.all(40.0),
-                ),
-                SizedBox(
-                  child: CircularProgressIndicator(
-                    value: null,
-                    strokeWidth: 7.0,
-                  ),
-                  height: 100.0,
-                  width: 100.0,
-                ),
-              ],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            child: Text(loadingText, style: TextStyle(fontSize: 25.0)),
+            padding: EdgeInsets.all(40.0),
+          ),
+          SizedBox(
+            child: CircularProgressIndicator(
+              value: null,
+              strokeWidth: 7.0,
             ),
-          )
+            height: 100.0,
+            width: 100.0,
+          ),
+        ],
+      ),
+    )
         : child;
   }
 }

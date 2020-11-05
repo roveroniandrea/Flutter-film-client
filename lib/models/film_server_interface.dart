@@ -153,7 +153,7 @@ class FilmServerInterface {
   /// Apre una finestra browser per scaricare la nuova versione dell'app
   ///
   /// In caso di errore ritorna una [Exception]
-  static void openDownloadLink() async{
+  static void openDownloadLink() async {
     if (await canLaunch('$_url/getApp')) {
       await launch('$_url/getApp');
     } else {
