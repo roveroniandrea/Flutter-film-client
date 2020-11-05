@@ -192,10 +192,21 @@ class _InspectFilmState extends State<InspectFilm> {
       // Se il server non è in fase di riavvio mostro lo snackbar
       if (castResult != CastResult.Restarting) {
         Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
+            behavior: SnackBarBehavior.floating,
             content: Container(
-              child: Text(
-                castResult == CastResult.Done ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
-                style: TextStyle(fontSize: 20.0),
+              child: Row(
+                children: [
+                  Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: Icon(castResult == CastResult.Done ? Icons.thumb_up : Icons.thumb_down,
+                          color: castResult == CastResult.Done
+                              ? DynamicTheme.of(context).convertTheme().iconTheme.color
+                              : DynamicTheme.of(context).convertTheme().errorColor)),
+                  Text(
+                    castResult == CastResult.Done ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                ],
               ),
               padding: EdgeInsets.all(6.0),
             ),
