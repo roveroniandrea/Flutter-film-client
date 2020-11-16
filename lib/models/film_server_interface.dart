@@ -3,6 +3,7 @@ import 'package:film_client/models/shared_preferences_keys.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'film_class.dart';
 import 'film_folder_class.dart';
 import 'package:http/http.dart' as http;
 
@@ -171,5 +172,24 @@ class FilmServerInterface {
 
     final String encoded = Uri.encodeFull(fullPath);
     return 'http://$_ip:$_port/$encoded';
+  }
+
+  /// Ritorna la lista dei film più recenti
+  static Future<List<FilmFolderClass>> getRecentFilms() async {
+    final response = await http.get('$_url/recent').catchError((err) {
+      return http.Response('', 404);
+    });
+    if (response.statusCode == 200) {
+      List<dynamic> films = json.decode(response.body);
+      return films.map((f) {
+        return FilmFolderClass(
+          path: f['path'],
+          films: [FilmClass(title: f['name'])],
+          folders: [],
+        );
+      }).toList();
+    } else {
+      throw new Exception('Error getFilms ${response.reasonPhrase}');
+    }
   }
 }

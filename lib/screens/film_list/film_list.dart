@@ -7,6 +7,7 @@ import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_folder_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
 import 'package:film_client/models/inspect_film_argument.dart';
+import 'package:film_client/screens/film_list/recent_films.dart';
 import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +26,7 @@ class _FilmListState extends State<FilmList> {
   /// Percorso del breadcrumb
   final List<String> _path = [];
 
+  /// Indica se l'animazione asse x della lista deve essere in avantio in indietro
   bool _isForward = true;
 
   /// true se sta chiedendo i film al server
@@ -50,6 +52,9 @@ class _FilmListState extends State<FilmList> {
 
   /// Stringa con il nome del film che sto cercando
   String _searchPattern = '';
+
+  /// Lista dei film più recenti
+  List<FilmFolderClass> _recentFilms = [];
 
   @override
   void initState() {
@@ -80,14 +85,22 @@ class _FilmListState extends State<FilmList> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: CustomProgress(
-            hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
-            loadingText: 'Recupero i film...',
-            isLoading: _loadingFilms,
-            errorChild: _buildErrorWidget(),
-            child: _buildFilmList()),
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: TabBarView(
+            children: [
+              CustomProgress(
+                  hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
+                  loadingText: 'Recupero i film...',
+                  isLoading: _loadingFilms,
+                  errorChild: _buildErrorWidget(),
+                  child: _buildFilmList()),
+              RecentFilms(_recentFilms, _handleFilmTap),
+            ],
+          ),
+        ),
       ),
       onWillPop: _onBackPressed,
     );
@@ -152,9 +165,10 @@ class _FilmListState extends State<FilmList> {
       _loadingFilms = true;
       _path.length = 0;
       _loadingError = '';
+      _recentFilms = [];
     });
 
-    // Chiamata al server
+    // Chiamata al server per i film
     Future<FilmFolderClass> httpCall = requestReload ? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
     httpCall.then((films) {
       setState(() {
@@ -168,6 +182,9 @@ class _FilmListState extends State<FilmList> {
         _loadingError = err.toString();
       });
     });
+
+    //Chiamata al server per i film recenti
+    FilmServerInterface.getRecentFilms().then((films) => _recentFilms = films);
   }
 
   /// Gestisce l'azione dell'utente di back button
@@ -304,9 +321,21 @@ class _FilmListState extends State<FilmList> {
 
   /// Crea l'appBar con eventuale campo di input per cercare i film
   AppBar _buildAppBar() {
+    TabBar tabBar = TabBar(
+      indicatorWeight: 4,
+      tabs: [
+        Tab(
+          child: Text("Elenco completo"),
+        ),
+        Tab(
+          text: "Più recenti",
+        )
+      ],
+    );
     if (!_isSearching) {
       return AppBar(
         title: Text('Lista dei film'),
+        bottom: tabBar,
         actions: [
           IconButton(
             icon: Icon(Icons.search),
@@ -353,6 +382,7 @@ class _FilmListState extends State<FilmList> {
             });
           },
         ),
+        bottom: tabBar,
       );
     }
   }
