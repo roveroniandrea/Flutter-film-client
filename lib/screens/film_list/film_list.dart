@@ -19,7 +19,7 @@ class FilmList extends StatefulWidget {
   _FilmListState createState() => _FilmListState();
 }
 
-class _FilmListState extends State<FilmList> {
+class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin {
   /// Elenco dei film con le varie cartelle
   FilmFolderClass _films;
 
@@ -56,6 +56,8 @@ class _FilmListState extends State<FilmList> {
   /// Lista dei film più recenti
   List<FilmFolderClass> _recentFilms = [];
 
+  TabController _tabController;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +75,8 @@ class _FilmListState extends State<FilmList> {
         _loadFilms(false);
       }
     });
+
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -90,6 +94,7 @@ class _FilmListState extends State<FilmList> {
         child: Scaffold(
           appBar: _buildAppBar(),
           body: TabBarView(
+            controller: _tabController,
             children: [
               CustomProgress(
                   hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
@@ -117,11 +122,15 @@ class _FilmListState extends State<FilmList> {
             items: (['Film'] + _path)
                 .asMap()
                 .entries
-                .map((entry) => BreadCrumbItem(
+                .map((entry) =>
+                BreadCrumbItem(
                     content: Text(entry.value, style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                     onTap: () => _handleBreacrumbTap(entry.key)))
                 .toList(),
-            divider: Icon(Icons.chevron_right, color: DynamicTheme.of(context).convertTheme().primaryColor),
+            divider: Icon(Icons.chevron_right, color: DynamicTheme
+                .of(context)
+                .convertTheme()
+                .primaryColor),
             overflow: WrapOverflow(direction: Axis.horizontal, keepLastDivider: false),
           ),
         ),
@@ -176,15 +185,23 @@ class _FilmListState extends State<FilmList> {
         _films = films;
         _loadingError = '';
       });
+
+      //Chiamata al server per i film recenti
+      FilmServerInterface.getRecentFilms().then((films) {
+        setState(() {
+          _recentFilms = films;
+        });
+      }, onError: (err) {
+        setState(() {
+          _recentFilms = [];
+        });
+      });
     }, onError: (err) {
       setState(() {
         _loadingFilms = false;
         _loadingError = err.toString();
       });
     });
-
-    //Chiamata al server per i film recenti
-    FilmServerInterface.getRecentFilms().then((films) => _recentFilms = films);
   }
 
   /// Gestisce l'azione dell'utente di back button
@@ -205,15 +222,23 @@ class _FilmListState extends State<FilmList> {
       return Future.value(false);
     }
 
+    if (_tabController.index > 0) {
+      // Seconda possibilità torno all'elenco dei film
+      setState(() {
+        _tabController.animateTo(0);
+      });
+      return Future.value(false);
+    }
+
     if (_path.length > 0) {
-      // Seconda possibilità salgo di una cartella
+      // Terza possibilità salgo di una cartella
       setState(() {
         _path.removeLast();
         _isForward = false;
       });
       return Future.value(false);
     } else {
-      // Terza possibilità chiedo se voglio uscire dall'app
+      // Quarta possibilità chiedo se voglio uscire dall'app
       return showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -265,13 +290,19 @@ class _FilmListState extends State<FilmList> {
   /// Crea il widget per l'errore di connessione
   Widget _buildErrorWidget() {
     return Container(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery
+            .of(context)
+            .size
+            .width,
         padding: EdgeInsets.only(top: 100.0),
         child: Column(
           children: [
             Text(
               _connectivityResult != ConnectivityResult.wifi ? 'Non sei connesso al Wi-Fi' : 'Il server è spento',
-              style: TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(color: DynamicTheme
+                  .of(context)
+                  .convertTheme()
+                  .errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
@@ -322,6 +353,7 @@ class _FilmListState extends State<FilmList> {
   /// Crea l'appBar con eventuale campo di input per cercare i film
   AppBar _buildAppBar() {
     TabBar tabBar = TabBar(
+      controller: _tabController,
       indicatorWeight: 4,
       tabs: [
         Tab(
@@ -373,9 +405,19 @@ class _FilmListState extends State<FilmList> {
           decoration: InputDecoration(
               hintText: "Cerca un film",
               border: InputBorder.none,
-              hintStyle: TextStyle(color: DynamicTheme.of(context).convertTheme().primaryTextTheme.caption.color)),
+              hintStyle: TextStyle(color: DynamicTheme
+                  .of(context)
+                  .convertTheme()
+                  .primaryTextTheme
+                  .caption
+                  .color)),
           autofocus: true,
-          style: TextStyle(fontSize: 20.0, color: DynamicTheme.of(context).convertTheme().primaryTextTheme.bodyText1.color),
+          style: TextStyle(fontSize: 20.0, color: DynamicTheme
+              .of(context)
+              .convertTheme()
+              .primaryTextTheme
+              .bodyText1
+              .color),
           onChanged: (value) {
             setState(() {
               _searchPattern = value;
@@ -390,32 +432,33 @@ class _FilmListState extends State<FilmList> {
   /// Crea i tiles per i film e le cartelle. Separa i tile da un Divider
   List<Widget> _buildListTiles() {
     FilmFolderClass subtree = _films;
-    _path.forEach((p) => {
-          if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
-        });
+    _path.forEach((p) =>
+    {
+      if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
+    });
     if (subtree == null) {
       subtree = new FilmFolderClass(path: '', folders: [], films: []);
     }
 
     final tiles = _mapFolders(subtree)
         .map<Widget>((folder) {
-          return ListTile(
-            title: Text(folder.path),
-            leading: Icon(Icons.folder),
-            onTap: () => _handleFolderTap(folder),
-            visualDensity: VisualDensity.comfortable,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          );
-        })
+      return ListTile(
+        title: Text(folder.path),
+        leading: Icon(Icons.folder),
+        onTap: () => _handleFolderTap(folder),
+        visualDensity: VisualDensity.comfortable,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      );
+    })
         .followedBy(_mapFilms(subtree).map<Widget>((film) {
-          return ListTile(
-            title: Text(film.title),
-            leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
-            onTap: () => _handleFilmTap(film),
-            visualDensity: VisualDensity.comfortable,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          );
-        }))
+      return ListTile(
+        title: Text(film.title),
+        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
+        onTap: () => _handleFilmTap(film),
+        visualDensity: VisualDensity.comfortable,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      );
+    }))
         .expand((element) => [element, Divider()])
         .toList();
 
