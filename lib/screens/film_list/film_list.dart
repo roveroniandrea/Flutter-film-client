@@ -102,7 +102,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
                   isLoading: _loadingFilms,
                   errorChild: _buildErrorWidget(),
                   child: _buildFilmList()),
-              RecentFilms(_recentFilms, _handleFilmTap),
+              RecentFilms(_recentFilms, context),
             ],
           ),
         ),

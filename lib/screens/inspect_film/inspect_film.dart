@@ -59,6 +59,7 @@ class _InspectFilmState extends State<InspectFilm> {
           return _buildBody();
         },
       ),
+      resizeToAvoidBottomInset: false,
     );
   }
 

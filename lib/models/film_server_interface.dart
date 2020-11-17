@@ -73,6 +73,7 @@ class FilmServerInterface {
   ///
   /// Ritorna l'esito della trasmissione con tipo [CastResult]
   static Future<CastResult> castOnDevice(String chromecast, String fullPath) async {
+    print('$_url/devicePlay?path=$fullPath&devName=$chromecast');
     final response = await http.get('$_url/devicePlay?path=$fullPath&devName=$chromecast').catchError((err) {
       return http.Response('', 404);
     });
