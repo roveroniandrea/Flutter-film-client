@@ -17,6 +17,7 @@ class RecentFilms extends StatelessWidget {
 
   Widget _buildList() {
     return ListView(
+        key: PageStorageKey<String>('list_recent'),
         padding: EdgeInsets.all(16.0),
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
@@ -38,6 +39,7 @@ class RecentFilms extends StatelessWidget {
             },
             visualDensity: VisualDensity.comfortable,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            subtitle: Text(film.humanDate),
           );
         })
         .expand((element) => [element, Divider()])

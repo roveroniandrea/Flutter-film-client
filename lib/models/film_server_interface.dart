@@ -185,7 +185,7 @@ class FilmServerInterface {
       return films.map((f) {
         return FilmFolderClass(
           path: f['path'],
-          films: [FilmClass(title: f['name'])],
+          films: [FilmClass(title: f['name'], dateTime: DateTime.parse(f['date']))],
           folders: [],
         );
       }).toList();

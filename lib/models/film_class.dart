@@ -1,19 +1,35 @@
+import 'package:intl/intl.dart';
+
 /// Definisce un singolo film
 class FilmClass {
   /// Formati supportati
   static final _supportedFormats = ['.mp4', '.m4v'];
+
   /// Titolo del film compresa l'estensione
   String _title = '';
+
   /// Titolo del film compresa l'estensione
   String get title => _title;
+
   /// Titolo del film esclusa l'estensione
   String _humanTitle = '';
+
   /// Titolo del film esclusa l'estensione
   String get humanTitle => _humanTitle;
+
   /// Estensione del film
   String _format = '';
 
-  FilmClass({String title}) {
+  /// Data di creazione del film
+  final DateTime dateTime;
+
+  /// Ritorna una data leggibile
+  String get humanDate {
+    String lowercase = DateFormat("EEE", "it").format(dateTime) + " ${dateTime.day} " + DateFormat("MMMM", "it").format(dateTime);
+    return "${lowercase[0].toUpperCase()}${lowercase.substring(1)}";
+  }
+
+  FilmClass({String title, this.dateTime}) {
     _title = title;
     final latestDot = title.lastIndexOf('.');
     if (latestDot > -1) {
@@ -26,9 +42,7 @@ class FilmClass {
 
   /// Ritorna [true] se l'estensione del film è tra quelle supportate
   bool isSupported() {
-    return _format != '' &&
-        _supportedFormats.contains(_format) &&
-        !title.contains("'");
+    return _format != '' && _supportedFormats.contains(_format) && !title.contains("'");
   }
 
   /// Ritorna il motivo per cui il film non è supportato
@@ -47,7 +61,7 @@ class FilmClass {
   /// Ritorna [true] se il pattern è presente all'interno del titolo del film
   ///
   /// La ricerca viene effettuata in lowercase per entrambe le stringhe e comprende anche l'estensione del film
-  bool matchesPattern(String pattern){
+  bool matchesPattern(String pattern) {
     return _title.toLowerCase().contains(pattern.toLowerCase());
   }
 }
