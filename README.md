@@ -2,6 +2,9 @@
 
 Client application built with Flutter for Film Server repository
 
+
+`flutter build appbundle` Builds an app budle `.aab` signed with private `upload-keystore.jks`. See https://docs.flutter.dev/deployment/android#create-an-upload-keystore
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
