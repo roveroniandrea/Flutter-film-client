@@ -6,7 +6,7 @@ class InspectFilmArgument {
   static final String routeName = '/inspect';
 
   /// Film da ispezionare
-  FilmClass _film;
+  late FilmClass _film;
 
   /// Film da ispezionare
   FilmClass get film => _film;
@@ -17,7 +17,7 @@ class InspectFilmArgument {
   /// Percorso completo del film dalla cartella radice
   String get fullPath => _fullPath;
 
-  InspectFilmArgument({FilmClass film, String fullPath}) {
+  InspectFilmArgument({required FilmClass film, String fullPath = ''}) {
     _film = film;
     _fullPath = fullPath;
   }

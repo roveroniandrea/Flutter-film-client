@@ -21,7 +21,7 @@ class FilmClass {
   String _format = '';
 
   /// Data di creazione del film
-  final DateTime dateTime;
+  late DateTime dateTime;
 
   /// Ritorna una data leggibile
   String get humanDate {
@@ -29,8 +29,9 @@ class FilmClass {
     return "${lowercase[0].toUpperCase()}${lowercase.substring(1)}";
   }
 
-  FilmClass({String title, this.dateTime}) {
+  FilmClass({required String title, DateTime? dateTime}) {
     _title = title;
+    this.dateTime = dateTime?? DateTime.now();
     final latestDot = title.lastIndexOf('.');
     if (latestDot > -1) {
       _format = title.substring(latestDot);

@@ -18,7 +18,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
   List<String> _serverIp = [];
 
   /// Numero di porta del server
-  int _serverPort;
+  int _serverPort = 9000;
 
   @override
   void initState() {
@@ -99,7 +99,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
                           Text('Modalità scura:', style: _textStyle),
                           Switch(
                             value: !DynamicTheme.isLightTheme,
-                            onChanged: (ligth) => DynamicTheme.of(context).setBrightness(!ligth),
+                            onChanged: (ligth) => DynamicTheme.of(context)?.setBrightness(!ligth),
                           )
                         ],
                       )
@@ -138,10 +138,10 @@ class _OptionsScreenState extends State<OptionsScreen> {
   /// Crea i quadrati per cambiare il tema dell'app
   List<Widget> _buildThemeSquares() {
     List<Widget> res = [];
-    final themes = DynamicTheme.of(context).dynamicThemes;
+    final themes = DynamicTheme.of(context)?.dynamicThemes ?? [];
     for (int i = 0; i < themes.length; i++) {
       res.add(GestureDetector(
-          onTap: () => DynamicTheme.of(context).setTheme(i),
+          onTap: () => DynamicTheme.of(context)?.setTheme(i),
           child: Stack(
               alignment: Alignment.center,
               children: <Widget>[

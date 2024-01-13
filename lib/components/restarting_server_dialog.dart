@@ -20,7 +20,7 @@ class _RestartingServerDialogState extends State<RestartingServerDialog> {
   /// Secondi rimanenti prima della chiusura del dialog.
   /// Non chiude effettivamente il dialog ma serve ad azzerare il CircularProgressIndicator
   double _secondsRemaining = FilmServerInterface.timeToRestart.inSeconds * 1.0;
-  Timer _timer;
+  late Timer _timer;
 
   @override
   void initState() {

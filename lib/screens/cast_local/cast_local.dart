@@ -18,10 +18,10 @@ class CastLocalScreen extends StatefulWidget {
 
 class _CastLocalScreenState extends State<CastLocalScreen> {
   /// Film da guardare. Recuperato dai parametri di rotta
-  FilmClass _film;
+  FilmClass? _film;
 
   /// Controller del video player
-  VideoPlayerController _controller;
+  VideoPlayerController? _controller;
 
   /// Se [true] indica che il ratio del film è stato caricato ed è possibile passarlo al video player
   bool _aspectRatioAvailable = false;
@@ -33,14 +33,15 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
     // Ritardo l'esecuzione perchè non è possibile chiamare setState in modo sincrono su initState
     Future.delayed(Duration.zero, () {
       // Recupero i parametri di rotta
-      final CastLocalArgument arg = ModalRoute.of(context).settings.arguments;
+      final CastLocalArgument arg =
+          ModalRoute.of(context)?.settings.arguments as CastLocalArgument;
       _film = arg.film;
       // Recupero l'url del server
       final filmUrlOnServer = FilmServerInterface.getFilmUrl(arg.fullPath);
       setState(() {
         // Imposto il controller
         _controller = VideoPlayerController.network(filmUrlOnServer);
-        _controller.initialize().then((value) {
+        _controller?.initialize().then((value) {
           setState(() {
             // Quando il controller ha recuperato l'aspect ratio del film cambio lo stato
             _aspectRatioAvailable = true;
@@ -55,7 +56,7 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
     super.dispose();
     if (_controller != null) {
       // Elimino il controller
-      _controller.dispose();
+      _controller?.dispose();
     }
   }
 
@@ -63,12 +64,14 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(_film != null ? _film.humanTitle : ''),
+          title: Text(_film?.humanTitle ?? ''),
         ),
         body: CustomProgress(
           errorChild: Text(
             'Errore non specificato',
-            style: TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor),
+            style: TextStyle(
+                color:
+                    DynamicTheme.of(context)?.convertTheme().colorScheme.error),
           ),
           hasError: false,
           isLoading: !_aspectRatioAvailable,
@@ -77,16 +80,18 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
             controller: ChewieController(
                 allowFullScreen: true,
                 allowMuting: true,
-                aspectRatio: _controller.value.aspectRatio,
+                aspectRatio: _controller?.value.aspectRatio,
                 autoInitialize: true,
-                deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+                deviceOrientationsAfterFullScreen: [
+                  DeviceOrientation.portraitUp
+                ],
                 fullScreenByDefault: false,
                 looping: false,
                 showControls: true,
                 startAt: Duration.zero,
                 autoPlay: true,
                 allowedScreenSleep: false,
-                videoPlayerController: _controller),
+                videoPlayerController: _controller as VideoPlayerController),
           ),
         ));
   }

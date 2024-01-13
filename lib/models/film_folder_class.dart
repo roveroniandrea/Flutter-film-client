@@ -22,7 +22,7 @@ class FilmFolderClass {
   ///Lista di tutti i film nella cartella
   List<FilmClass> get films => _films;
 
-  FilmFolderClass({String path, List<FilmFolderClass> folders, List<FilmClass> films}) {
+  FilmFolderClass({required String path, required List<FilmFolderClass> folders, required List<FilmClass> films}) {
     _path = path;
     _folders = folders;
     _films = films;

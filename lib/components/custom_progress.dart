@@ -17,7 +17,7 @@ class CustomProgress extends StatelessWidget {
   /// Widget mostrato quando [hasError == true]
   final Widget errorChild;
 
-  CustomProgress({Key key, this.isLoading, this.loadingText, this.child, this.hasError, this.errorChild});
+  CustomProgress({Key? key, required this.isLoading, required this.loadingText, required this.child, required this.hasError, required this.errorChild});
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +26,12 @@ class CustomProgress extends StatelessWidget {
       child: _buildWidget(),
       switchInCurve: Curves.easeOutCirc,
       switchOutCurve: Curves.easeInCirc,
-      layoutBuilder: (Widget currentChild, List<Widget> previousChildren) {
+      layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
         return Stack(
-          children: <Widget>[
+          children: currentChild != null ? <Widget>[
             ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+            currentChild,
+          ]: [],
           alignment: Alignment.topCenter,
         );
       },

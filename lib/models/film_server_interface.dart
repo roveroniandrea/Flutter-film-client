@@ -55,7 +55,7 @@ class FilmServerInterface {
   ///
   /// In caso di errore ritorna una [Exception]
   static Future<List<String>> getChromecasts() async {
-    final response = await http.get('$_url/getDevices').catchError((err) {
+    final response = await http.get(Uri.parse('$_url/getDevices')).catchError((err) {
       return http.Response('', 404);
     });
     if (response.statusCode == 200) {
@@ -74,7 +74,7 @@ class FilmServerInterface {
   /// Ritorna l'esito della trasmissione con tipo [CastResult]
   static Future<CastResult> castOnDevice(String chromecast, String fullPath) async {
     print('$_url/devicePlay?path=$fullPath&devName=$chromecast');
-    final response = await http.get('$_url/devicePlay?path=$fullPath&devName=$chromecast').catchError((err) {
+    final response = await http.get(Uri.parse('$_url/devicePlay?path=$fullPath&devName=$chromecast')).catchError((err) {
       return http.Response('', 404);
     });
     if (response.statusCode == 200) {
@@ -93,7 +93,7 @@ class FilmServerInterface {
   ///
   /// In caso di errore ritorna una [Exception]
   static Future<FilmFolderClass> reloadFilmDirectory() async {
-    final response = await http.get('$_url/realoadDir').catchError((err) {
+    final response = await http.get(Uri.parse('$_url/realoadDir')).catchError((err) {
       return http.Response('', 404);
     });
     if (response.statusCode == 200) {
@@ -142,7 +142,7 @@ class FilmServerInterface {
   /// In caso di errore ritorna una [Exception]
   static Future<bool> checkForUpdates() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final response = await http.get('$_url/appVersion').catchError((err) {
+    final response = await http.get(Uri.parse('$_url/appVersion')).catchError((err) {
       return http.Response('', 404);
     });
     if (response.statusCode == 200) {
@@ -177,7 +177,7 @@ class FilmServerInterface {
 
   /// Ritorna la lista dei film più recenti
   static Future<List<FilmFolderClass>> getRecentFilms() async {
-    final response = await http.get('$_url/recent').catchError((err) {
+    final response = await http.get(Uri.parse('$_url/recent')).catchError((err) {
       return http.Response('', 404);
     });
     if (response.statusCode == 200) {

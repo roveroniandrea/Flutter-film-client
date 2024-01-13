@@ -11,5 +11,5 @@ class CastLocalArgument {
   /// Percorso completo del film (solo percorso cartelle)
   String fullPath = '';
 
-  CastLocalArgument({this.film, this.fullPath});
+  CastLocalArgument({required this.film, required this.fullPath});
 }

@@ -13,13 +13,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Ingloba [MaterialApp] con il tema dinamico
 class DynamicTheme extends StatefulWidget {
   /// Index del tema corrente
-  static int _currentThemeIndex;
+  static int _currentThemeIndex = 0;
 
   /// Index del tema corrente
   static get currentThemeIndex => _currentThemeIndex;
 
   /// Specifica se light mode o dark mode
-  static bool _isLightTheme;
+  static bool _isLightTheme = true;
 
   /// Specifica se light mode o dark mode
   static get isLightTheme => _isLightTheme;
@@ -28,7 +28,7 @@ class DynamicTheme extends StatefulWidget {
   _DynamicThemeState createState() => _DynamicThemeState();
 
   /// Ritorna l'istanza di [DynamicTheme]
-  static _DynamicThemeState of(BuildContext context) {
+  static _DynamicThemeState? of(BuildContext context) {
     return context.findAncestorStateOfType<_DynamicThemeState>();
   }
 
@@ -103,8 +103,7 @@ class _DynamicThemeState extends State<DynamicTheme> {
     DynamicThemeData theme = dynamicThemes[DynamicTheme.currentThemeIndex];
     return ThemeData(
         primaryColor: theme.primaryColor,
-        accentColor: theme.accentColor,
-        brightness: DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark);
+        brightness: DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: theme.accentColor));
   }
 
   /// Salva in locale e visualizza un nuovo tema

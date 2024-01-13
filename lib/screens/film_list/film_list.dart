@@ -21,7 +21,7 @@ class FilmList extends StatefulWidget {
 
 class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin {
   /// Elenco dei film con le varie cartelle
-  FilmFolderClass _films;
+  FilmFolderClass? _films;
 
   /// Percorso del breadcrumb
   final List<String> _path = [];
@@ -39,7 +39,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   ConnectivityResult _connectivityResult = ConnectivityResult.wifi;
 
   /// Listener per il cambio di connessione
-  StreamSubscription<ConnectivityResult> _streamSubscription;
+  late StreamSubscription<ConnectivityResult> _streamSubscription;
 
   /// Settato a [true] se l'utente non vuole aggiornare l'app
   bool _skipUpdate = false;
@@ -56,7 +56,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   /// Lista dei film più recenti
   List<FilmFolderClass> _recentFilms = [];
 
-  TabController _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -129,7 +129,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
                 .toList(),
             divider: Icon(Icons.chevron_right, color: DynamicTheme
                 .of(context)
-                .convertTheme()
+                ?.convertTheme()
                 .primaryColor),
             overflow: WrapOverflow(direction: Axis.horizontal, keepLastDivider: false),
           ),
@@ -240,9 +240,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
     } else {
       // Quarta possibilità chiedo se voglio uscire dall'app
       return showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          child: AlertDialog(
+          builder: (context) => AlertDialog(
             title: Text("Vuoi uscire dall'app?"),
             actions: [
               TextButton.icon(
@@ -257,7 +255,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
                 onPressed: () => Navigator.of(context).pop(false),
               ),
             ],
-          ));
+          ), context: context,
+          barrierDismissible: false).then((value) => value ?? false);
     }
   }
 
@@ -301,8 +300,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
               _connectivityResult != ConnectivityResult.wifi ? 'Non sei connesso al Wi-Fi' : 'Il server è spento',
               style: TextStyle(color: DynamicTheme
                   .of(context)
-                  .convertTheme()
-                  .errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
+                  ?.convertTheme()
+                  .colorScheme.error, fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
@@ -321,9 +320,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
     FilmServerInterface.checkForUpdates().then((updateAvailable) {
       if (updateAvailable) {
         Future<bool> updateDialog = showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            child: AlertDialog(
+            builder: (context) => AlertDialog(
               title: Text("E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
               actions: [
                 TextButton.icon(
@@ -336,7 +333,9 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
               ],
-            ));
+            ), context: context,
+            barrierDismissible: false)
+            .then((value) => value ?? false);
 
         updateDialog.then((updateYN) {
           _alreadyCheckingForUpdates = false;
@@ -407,17 +406,17 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
               border: InputBorder.none,
               hintStyle: TextStyle(color: DynamicTheme
                   .of(context)
-                  .convertTheme()
+                  ?.convertTheme()
                   .primaryTextTheme
-                  .caption
-                  .color)),
+                  .bodySmall
+                  ?.color)),
           autofocus: true,
           style: TextStyle(fontSize: 20.0, color: DynamicTheme
               .of(context)
-              .convertTheme()
+              ?.convertTheme()
               .primaryTextTheme
-              .bodyText1
-              .color),
+              .bodyLarge
+              ?.color),
           onChanged: (value) {
             setState(() {
               _searchPattern = value;
@@ -431,17 +430,12 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
 
   /// Crea i tiles per i film e le cartelle. Separa i tile da un Divider
   List<Widget> _buildListTiles() {
-    FilmFolderClass subtree = _films;
+    FilmFolderClass? subtree = _films;
     _path.forEach((p) =>
-    {
-      if (subtree != null) {subtree = subtree.folders.firstWhere((folder) => folder.path == p, orElse: () => null)}
-    });
-    if (subtree == null) {
-      subtree = new FilmFolderClass(path: '', folders: [], films: []);
-    }
+    subtree = subtree?.folders.firstWhere((folder) => folder.path == p));
 
     final tiles = _mapFolders(subtree)
-        .map<Widget>((folder) {
+        ?.map<Widget>((folder) {
       return ListTile(
         title: Text(folder.path),
         leading: Icon(Icons.folder),
@@ -450,7 +444,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       );
     })
-        .followedBy(_mapFilms(subtree).map<Widget>((film) {
+        .followedBy((_mapFilms(subtree)?? []).map<Widget>((film) {
       return ListTile(
         title: Text(film.title),
         leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
@@ -462,8 +456,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
         .expand((element) => [element, Divider()])
         .toList();
 
-    if (tiles.length > 0)
-      return tiles;
+    if ((tiles?.length ?? 0) > 0)
+      return tiles ?? [];
     else {
       return [
         Container(
@@ -480,20 +474,20 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   }
 
   /// Ritorna le sottocartelle da visulizzare nel caso stia effettuando una ricerca
-  List<FilmFolderClass> _mapFolders(FilmFolderClass subtree) {
+  List<FilmFolderClass>? _mapFolders(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
-      return subtree.folders.where((folder) => folder.matchesPattern(_searchPattern)).toList();
+      return subtree?.folders.where((folder) => folder.matchesPattern(_searchPattern)).toList();
     } else {
-      return subtree.folders;
+      return subtree?.folders;
     }
   }
 
   /// Ritorna i film da visulizzare nel caso stia effettuando una ricerca
-  List<FilmClass> _mapFilms(FilmFolderClass subtree) {
+  List<FilmClass>? _mapFilms(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
-      return subtree.films.where((film) => film.matchesPattern(_searchPattern)).toList();
+      return subtree?.films.where((film) => film.matchesPattern(_searchPattern)).toList();
     } else {
-      return subtree.films;
+      return subtree?.films;
     }
   }
 }

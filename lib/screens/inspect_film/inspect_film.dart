@@ -5,7 +5,6 @@ import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
 import 'package:film_client/models/inspect_film_argument.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /// Screen per ispezionare un film e scegliere dove guardarlo
@@ -19,7 +18,7 @@ class _InspectFilmState extends State<InspectFilm> {
   List<String> _chromecasts = [];
 
   /// Film da ispezionare
-  FilmClass _film;
+  FilmClass? _film;
 
   /// Percorso completo del film dalla cartella radice
   String _fullPath = '';
@@ -31,7 +30,7 @@ class _InspectFilmState extends State<InspectFilm> {
   bool _searchingChromecasts = false;
 
   /// Context utilizzato per mostrare lo snackbar
-  BuildContext _scaffoldContext;
+  BuildContext? _scaffoldContext;
 
   @override
   void initState() {
@@ -39,7 +38,7 @@ class _InspectFilmState extends State<InspectFilm> {
     // Non posso modificare lo stato direttamente in initState
     Future.delayed(Duration.zero, () {
       setState(() {
-        final InspectFilmArgument arg = ModalRoute.of(context).settings.arguments;
+        final InspectFilmArgument arg = ModalRoute.of(context)?.settings.arguments as InspectFilmArgument;
         _film = arg.film;
         _fullPath = arg.fullPath;
       });
@@ -71,7 +70,7 @@ class _InspectFilmState extends State<InspectFilm> {
               Container(
                 padding: EdgeInsets.all(20.0),
                 child: Text(
-                  'Dove vuoi guardare\n"${_film.humanTitle}" ?',
+                  'Dove vuoi guardare\n"${_film?.humanTitle ?? ''}" ?',
                   style: TextStyle(fontSize: 25.0),
                   textAlign: TextAlign.center,
                 ),
@@ -90,7 +89,7 @@ class _InspectFilmState extends State<InspectFilm> {
   ///
   /// Gestisce anche gli stati di loading e film non supportato
   Widget _buildButtons() {
-    final List<Widget> castLocal = _film.isSupported()
+    final List<Widget> castLocal = (_film?.isSupported() ?? false)
         ? [
             Container(
               padding: EdgeInsets.all(20.0),
@@ -109,7 +108,7 @@ class _InspectFilmState extends State<InspectFilm> {
               CustomProgress(
                 isLoading: _transmittingOnChromecast || _searchingChromecasts,
                 loadingText: _transmittingOnChromecast ? 'Trasmissione in corso...' : 'Recupero i Chromecast...',
-                hasError: !_film.isSupported(),
+                hasError: !(_film?.isSupported() ?? false),
                 child: Column(children: [
                   Column(
                     children: [
@@ -142,9 +141,9 @@ class _InspectFilmState extends State<InspectFilm> {
                 errorChild: Container(
                   padding: EdgeInsets.only(top: 100.0),
                   child: Text(
-                    'Impossibile trasmettere il film:\n\n${_film.notSupportedReason()}',
+                    'Impossibile trasmettere il film:\n\n${_film?.notSupportedReason() ?? ''}',
                     style:
-                        TextStyle(color: DynamicTheme.of(context).convertTheme().errorColor, fontSize: 20.0, fontWeight: FontWeight.bold),
+                        TextStyle(color: DynamicTheme.of(context)?.convertTheme().colorScheme.error, fontSize: 20.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -174,7 +173,7 @@ class _InspectFilmState extends State<InspectFilm> {
 
   /// Passa alla rotta per guardare il film sul telefono
   void _handleGuardaSuTelefono() {
-    Navigator.pushNamed(context, CastLocalArgument.routeName, arguments: CastLocalArgument(film: _film, fullPath: _fullPath));
+    Navigator.pushNamed(context, CastLocalArgument.routeName, arguments: CastLocalArgument(film: _film as FilmClass, fullPath: _fullPath));
   }
 
   /// Inizia la trasmissione su un chromecast
@@ -192,7 +191,9 @@ class _InspectFilmState extends State<InspectFilm> {
       });
       // Se il server non è in fase di riavvio mostro lo snackbar
       if (castResult != CastResult.Restarting) {
-        Scaffold.of(_scaffoldContext).showSnackBar(SnackBar(
+        /*
+        FIXME: Compile error
+        Scaffold.of(_scaffoldContext as BuildContext).showSnackBar(SnackBar(
             behavior: SnackBarBehavior.floating,
             content: Container(
               child: Row(
@@ -201,8 +202,8 @@ class _InspectFilmState extends State<InspectFilm> {
                       padding: const EdgeInsets.only(right: 20),
                       child: Icon(castResult == CastResult.Done ? Icons.thumb_up : Icons.thumb_down,
                           color: castResult == CastResult.Done
-                              ? DynamicTheme.of(context).convertTheme().iconTheme.color
-                              : DynamicTheme.of(context).convertTheme().errorColor)),
+                              ? DynamicTheme.of(context)?.convertTheme().iconTheme.color
+                              : DynamicTheme.of(context)?.convertTheme().colorScheme.error)),
                   Text(
                     castResult == CastResult.Done ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
                     style: TextStyle(fontSize: 20.0),
@@ -212,6 +213,8 @@ class _InspectFilmState extends State<InspectFilm> {
               padding: EdgeInsets.all(6.0),
             ),
             duration: Duration(seconds: 3)));
+
+            */
       } else {
         showDialog(
             context: context,
