@@ -41,8 +41,9 @@ class DynamicTheme extends StatefulWidget {
     await Future.delayed(Duration(seconds: 1));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _currentThemeIndex = prefs.getInt(SharedPreferencesKeys.THEME_INDEX) ?? 7;
-    _isLightTheme =
-        prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ?? SchedulerBinding.instance.window.platformBrightness == Brightness.light;
+    _isLightTheme = true;
+    // FIXME: this crashes on dark theme
+        // prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ?? SchedulerBinding.instance.window.platformBrightness == Brightness.light;
   }
 
   /// Chiamato dal widget stesso
