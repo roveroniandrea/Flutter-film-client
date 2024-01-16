@@ -40,7 +40,7 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
       final filmUrlOnServer = FilmServerInterface.getFilmUrl(arg.fullPath);
       setState(() {
         // Imposto il controller
-        _controller = VideoPlayerController.network(filmUrlOnServer);
+        _controller = VideoPlayerController.networkUrl(Uri.parse(filmUrlOnServer));
         _controller?.initialize().then((value) {
           setState(() {
             // Quando il controller ha recuperato l'aspect ratio del film cambio lo stato
@@ -90,7 +90,9 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
                 showControls: true,
                 startAt: Duration.zero,
                 autoPlay: true,
+                draggableProgressBar: true,
                 allowedScreenSleep: false,
+                zoomAndPan: true,
                 videoPlayerController: _controller as VideoPlayerController),
           ),
         ));
