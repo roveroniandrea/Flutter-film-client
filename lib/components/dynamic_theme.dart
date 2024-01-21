@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/dynamic_theme_data.dart';
 import 'package:film_client/models/inspect_film_argument.dart';
@@ -7,7 +9,6 @@ import 'package:film_client/screens/film_list/film_list.dart';
 import 'package:film_client/screens/inspect_film/inspect_film.dart';
 import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Ingloba [MaterialApp] con il tema dinamico
@@ -41,9 +42,8 @@ class DynamicTheme extends StatefulWidget {
     await Future.delayed(Duration(seconds: 1));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _currentThemeIndex = prefs.getInt(SharedPreferencesKeys.THEME_INDEX) ?? 7;
-    _isLightTheme = true;
-    // FIXME: this crashes on dark theme
-        // prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ?? SchedulerBinding.instance.window.platformBrightness == Brightness.light;
+    _isLightTheme = prefs.getBool(SharedPreferencesKeys.THEME_BRIGHTNESS) ??
+        PlatformDispatcher.instance.platformBrightness == Brightness.light;
   }
 
   /// Chiamato dal widget stesso
@@ -80,7 +80,8 @@ class _DynamicThemeState extends State<DynamicTheme> {
     // Creo la lista dei temi
     _dynamicThemes.clear();
     for (int i = 0; i < 16; i++) {
-      _dynamicThemes.add(DynamicThemeData(Colors.primaries[i], Colors.accents[i]));
+      _dynamicThemes
+          .add(DynamicThemeData(Colors.primaries[i], Colors.accents[i]));
     }
   }
 
@@ -102,9 +103,13 @@ class _DynamicThemeState extends State<DynamicTheme> {
   /// Ritorna il tema material in base alle impostazioni correnti
   ThemeData convertTheme() {
     DynamicThemeData theme = dynamicThemes[DynamicTheme.currentThemeIndex];
+
+    Brightness brightness =
+        DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark;
+
     return ThemeData(
-        primaryColor: theme.primaryColor,
-        brightness: DynamicTheme.isLightTheme ? Brightness.light : Brightness.dark, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: theme.accentColor));
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: theme.primaryColor, brightness: brightness));
   }
 
   /// Salva in locale e visualizza un nuovo tema
