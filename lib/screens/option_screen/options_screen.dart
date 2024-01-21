@@ -45,7 +45,26 @@ class _OptionsScreenState extends State<OptionsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text('${_serverIp[0]}.${_serverIp[1]}.', style: _textStyle),
+                              Container(
+                                  width: 50,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    style: _textStyle,
+                                    textAlign: TextAlign.center,
+                                    initialValue: _serverIp[0],
+                                    onChanged: (value) => _changeIp(0, value),
+                                  )),
+                              Text('.', style: _textStyle),
+                              Container(
+                                  width: 50,
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    style: _textStyle,
+                                    textAlign: TextAlign.center,
+                                    initialValue: _serverIp[1],
+                                    onChanged: (value) => _changeIp(1, value),
+                                  )),
+                              Text('.', style: _textStyle),
                               Container(
                                   width: 50,
                                   child: TextFormField(
@@ -82,7 +101,8 @@ class _OptionsScreenState extends State<OptionsScreen> {
                                 style: _textStyle,
                                 textAlign: TextAlign.center,
                                 initialValue: '$_serverPort',
-                                onChanged: (value) => _changePort(int.parse(value)),
+                                onChanged: (value) =>
+                                    _changePort(int.parse(value)),
                               )),
                         ],
                       ),
@@ -99,7 +119,8 @@ class _OptionsScreenState extends State<OptionsScreen> {
                           Text('Modalità scura:', style: _textStyle),
                           Switch(
                             value: !DynamicTheme.isLightTheme,
-                            onChanged: (ligth) => DynamicTheme.of(context)?.setBrightness(!ligth),
+                            onChanged: (ligth) =>
+                                DynamicTheme.of(context)?.setBrightness(!ligth),
                           )
                         ],
                       )
@@ -147,15 +168,21 @@ class _OptionsScreenState extends State<OptionsScreen> {
               children: <Widget>[
                     Container(
                       decoration: i == DynamicTheme.currentThemeIndex
-                          ? BoxDecoration(border: Border.all(width: 3.0), color: themes[i].primaryColor)
+                          ? BoxDecoration(
+                              border: Border.all(width: 3.0),
+                              color: themes[i].primaryColor)
                           : null,
                       margin: EdgeInsets.all(5.0),
                       height: 60.0,
                       width: 60.0,
-                      color: i != DynamicTheme.currentThemeIndex ? themes[i].primaryColor : null,
+                      color: i != DynamicTheme.currentThemeIndex
+                          ? themes[i].primaryColor
+                          : null,
                     ),
                   ] +
-                  (i == DynamicTheme.currentThemeIndex ? [Icon(Icons.check)] : []))));
+                  (i == DynamicTheme.currentThemeIndex
+                      ? [Icon(Icons.check)]
+                      : []))));
     }
     return res;
   }
