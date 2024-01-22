@@ -17,7 +17,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
 #La sintassi è: NomeVersione+NumeroVersione
-version: 2.6.0+9
+# Il numero di versione serve a Play Console per capire che il nuovo app bundle è di una versione successiva
+version: 2.7.0+10
 
 environment:
   sdk: "^3.2.0"
