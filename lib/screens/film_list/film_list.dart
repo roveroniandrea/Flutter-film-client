@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:animations/animations.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -13,6 +14,7 @@ import 'package:film_client/screens/option_screen/options_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 /// Screen per visualizzare l'elenco dei film e sottocartelle
 class FilmList extends StatefulWidget {
@@ -128,7 +130,7 @@ class _FilmListState extends State<FilmList>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.only(top: 20.0, left: 16.0),
           child: BreadCrumb(
             items: (['Film'] + _path)
                 .asMap()
@@ -140,7 +142,10 @@ class _FilmListState extends State<FilmList>
                     onTap: () => _handleBreacrumbTap(entry.key)))
                 .toList(),
             divider: Icon(Icons.chevron_right,
-                color: DynamicTheme.of(context)?.convertTheme().primaryColor),
+                color: DynamicTheme.of(context)
+                    ?.convertTheme()
+                    .colorScheme
+                    .primary),
             overflow: WrapOverflow(
                 direction: Axis.horizontal, keepLastDivider: false),
           ),
@@ -318,13 +323,19 @@ class _FilmListState extends State<FilmList>
               _showConnectToWifi
                   ? 'Non sei connesso al Wi-Fi'
                   : 'Il server è spento',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
               padding: EdgeInsets.only(top: 30.0),
               child: Icon(_showConnectToWifi ? Icons.wifi_off : Icons.cloud_off,
-                  size: 100.0),
+                  size: 100.0,
+                  color: DynamicTheme.of(context)
+                      ?.convertTheme()
+                      .colorScheme
+                      .error),
             )
           ],
         ));
@@ -443,33 +454,64 @@ class _FilmListState extends State<FilmList>
     _path.forEach((p) =>
         subtree = subtree?.folders.firstWhere((folder) => folder.path == p));
 
-    final tiles = _mapFolders(subtree)
-        ?.map<Widget>((folder) {
-          return ListTile(
-            title: Text(folder.path),
-            leading: Icon(Icons.folder),
-            onTap: () => _handleFolderTap(folder),
-            visualDensity: VisualDensity.comfortable,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          );
+    final Iterable<Widget> groupedFolders = _mapFolders(subtree)
+        .fold<SplayTreeMap<String, List<FilmFolderClass>>>(new SplayTreeMap(),
+            (acc, element) {
+          String firstLetter = element.path[0].toLowerCase();
+          if (!acc.containsKey(firstLetter)) {
+            acc[firstLetter] = [];
+          }
+
+          acc[firstLetter]?.add(element);
+
+          return acc;
         })
-        .followedBy((_mapFilms(subtree) ?? []).map<Widget>((film) {
-          return ListTile(
-            title: Text(film.title),
-            leading: Icon(Icons.movie,
-                color: film.isSupported() ? Colors.green : Colors.red),
-            onTap: () => _handleFilmTap(film),
-            visualDensity: VisualDensity.comfortable,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        .entries
+        .map<Widget>((entry) {
+          return StickyHeader(
+            header: Container(
+                height: 50.0,
+                alignment: Alignment.centerLeft,
+                child: Text(entry.key.toUpperCase(),
+                    style:
+                        TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold)),
+                color: DynamicTheme.of(context)
+                    ?.convertTheme()
+                    .colorScheme
+                    .background),
+            content: Column(
+                children: entry.value
+                    .map((folder) => ListTile(
+                          title: Text(folder.path),
+                          leading: Icon(Icons.folder),
+                          onTap: () => _handleFolderTap(folder),
+                          visualDensity: VisualDensity.comfortable,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ))
+                    .toList()),
           );
-        }))
+        });
+
+    final Iterable<Widget> groupedFilms =
+        _mapFilms(subtree).map<Widget>((film) {
+      return ListTile(
+        title: Text(film.title),
+        leading: Icon(Icons.movie,
+            color: film.isSupported() ? Colors.green : Colors.red),
+        onTap: () => _handleFilmTap(film),
+        visualDensity: VisualDensity.comfortable,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      );
+    });
+
+    final List<Widget> tiles = groupedFolders
+        .followedBy(groupedFilms)
         .expand((element) => [element, Divider()])
         .toList();
 
-    if ((tiles?.length ?? 0) > 0)
-      return tiles ?? [];
+    if (tiles.length > 0)
+      return tiles;
     else {
       return [
         Container(
@@ -488,24 +530,26 @@ class _FilmListState extends State<FilmList>
   }
 
   /// Ritorna le sottocartelle da visulizzare nel caso stia effettuando una ricerca
-  List<FilmFolderClass>? _mapFolders(FilmFolderClass? subtree) {
+  List<FilmFolderClass> _mapFolders(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
       return subtree?.folders
-          .where((folder) => folder.matchesPattern(_searchPattern))
-          .toList();
+              .where((folder) => folder.matchesPattern(_searchPattern))
+              .toList() ??
+          [];
     } else {
-      return subtree?.folders;
+      return subtree?.folders ?? [];
     }
   }
 
   /// Ritorna i film da visulizzare nel caso stia effettuando una ricerca
-  List<FilmClass>? _mapFilms(FilmFolderClass? subtree) {
+  List<FilmClass> _mapFilms(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
       return subtree?.films
-          .where((film) => film.matchesPattern(_searchPattern))
-          .toList();
+              .where((film) => film.matchesPattern(_searchPattern))
+              .toList() ??
+          [];
     } else {
-      return subtree?.films;
+      return subtree?.films ?? [];
     }
   }
 }

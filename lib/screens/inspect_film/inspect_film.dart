@@ -145,9 +145,8 @@ class _InspectFilmState extends State<InspectFilm> {
                   padding: EdgeInsets.only(top: 100.0),
                   child: Text(
                     'Impossibile trasmettere il film:\n\n${_film?.notSupportedReason() ?? ''}',
-                    style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold),
+                    style:
+                        TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -222,7 +221,12 @@ class _InspectFilmState extends State<InspectFilm> {
                         castResult == CastResult.Done
                             ? 'Trasmissione avvenuta!'
                             : 'Errore in trasmissione',
-                        style: TextStyle(fontSize: 20.0),
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: DynamicTheme.of(context)
+                                ?.convertTheme()
+                                .colorScheme
+                                .error),
                       ),
                     ],
                   ),

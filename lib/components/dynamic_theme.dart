@@ -101,6 +101,7 @@ class _DynamicThemeState extends State<DynamicTheme> {
   }
 
   /// Ritorna il tema material in base alle impostazioni correnti
+  /// Per accedere allo schema colori, usa `convertTheme().colorScheme`
   ThemeData convertTheme() {
     DynamicThemeData theme = dynamicThemes[DynamicTheme.currentThemeIndex];
 
@@ -109,7 +110,8 @@ class _DynamicThemeState extends State<DynamicTheme> {
 
     return ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: theme.primaryColor, brightness: brightness));
+            seedColor: theme.primaryColor,
+            brightness: brightness));
   }
 
   /// Salva in locale e visualizza un nuovo tema
