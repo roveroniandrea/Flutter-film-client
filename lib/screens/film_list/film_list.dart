@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:film_client/components/custom_progress.dart';
 import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/models/film_class.dart';
@@ -37,8 +37,8 @@ class _FilmListState extends State<FilmList>
   /// diverso da '' se c'è stato un errore nella richiesta dei film
   String _loadingError = '';
 
-  /// Indica lo stato della connessione, se assente, dati o wifi
-  ConnectivityResult _connectivityResult = ConnectivityResult.wifi;
+// Indica se mostrare il testo "Connettiti al wifi"
+  bool _showConnectToWifi = false;
 
   /// Listener per il cambio di connessione
   late StreamSubscription<ConnectivityResult> _streamSubscription;
@@ -69,14 +69,21 @@ class _FilmListState extends State<FilmList>
 
     // Ascolto per cambi di connessione
     final Connectivity _connectivity = new Connectivity();
-    _streamSubscription =
-        _connectivity.onConnectivityChanged.listen((connectivityResult) {
+    _connectivity.checkConnectivity().then((initialConnectivity) {
       setState(() {
-        _connectivityResult = connectivityResult;
+        _showConnectToWifi = initialConnectivity == ConnectivityResult.none;
       });
-      if (_connectivityResult == ConnectivityResult.wifi) {
-        _loadFilms(false);
-      }
+
+      _streamSubscription =
+          _connectivity.onConnectivityChanged.listen((connectivityResult) {
+        setState(() {
+          _showConnectToWifi = connectivityResult == ConnectivityResult.none;
+        });
+
+        if (connectivityResult != ConnectivityResult.none) {
+          _loadFilms(false);
+        }
+      });
     });
 
     _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
@@ -100,8 +107,7 @@ class _FilmListState extends State<FilmList>
             controller: _tabController,
             children: [
               CustomProgress(
-                  hasError: _connectivityResult != ConnectivityResult.wifi ||
-                      _loadingError != '',
+                  hasError: _showConnectToWifi || _loadingError != '',
                   loadingText: 'Recupero i film...',
                   isLoading: _loadingFilms,
                   errorChild: _buildErrorWidget(),
@@ -309,7 +315,7 @@ class _FilmListState extends State<FilmList>
         child: Column(
           children: [
             Text(
-              _connectivityResult != ConnectivityResult.wifi
+              _showConnectToWifi
                   ? 'Non sei connesso al Wi-Fi'
                   : 'Il server è spento',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
@@ -317,10 +323,7 @@ class _FilmListState extends State<FilmList>
             ),
             Container(
               padding: EdgeInsets.only(top: 30.0),
-              child: Icon(
-                  _connectivityResult != ConnectivityResult.wifi
-                      ? Icons.wifi_off
-                      : Icons.cloud_off,
+              child: Icon(_showConnectToWifi ? Icons.wifi_off : Icons.cloud_off,
                   size: 100.0),
             )
           ],
