@@ -1,6 +1,5 @@
 import 'package:chewie/chewie.dart';
 import 'package:film_client/components/custom_progress.dart';
-import 'package:film_client/components/dynamic_theme.dart';
 import 'package:film_client/models/cast_local_argument.dart';
 import 'package:film_client/models/film_class.dart';
 import 'package:film_client/models/film_server_interface.dart';
