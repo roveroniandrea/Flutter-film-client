@@ -26,9 +26,11 @@ class _RestartingServerDialogState extends State<RestartingServerDialog> {
   void initState() {
     super.initState();
     // Timer che ad ogni tot aggiorna lo stato del dialog
-    _timer = Timer.periodic(Duration(milliseconds: (_secondsInterval * 1000).round()), (timer) {
+    _timer = Timer.periodic(
+        Duration(milliseconds: (_secondsInterval * 1000).round()), (timer) {
       setState(() {
-        _secondsRemaining = FilmServerInterface.timeToRestart.inSeconds - timer.tick * _secondsInterval;
+        _secondsRemaining = FilmServerInterface.timeToRestart.inSeconds -
+            timer.tick * _secondsInterval;
       });
     });
   }
@@ -42,17 +44,17 @@ class _RestartingServerDialogState extends State<RestartingServerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-        // Impedisco che il dilog possa essere chiuso premendo indietro
-        return Future.value(false);
-      },
+    return PopScope(
+      // Impedisco che il dilog possa essere chiuso premendo indietro
+      canPop: false,
       child: AlertDialog(
-        title: new Text('Il film inizierà a breve', style: TextStyle(fontSize: 25.0)),
+        title: new Text('Il film inizierà a breve',
+            style: TextStyle(fontSize: 25.0)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            new Text('Il server si sta riavviando, attendi...', style: TextStyle(fontSize: 20.0)),
+            new Text('Il server si sta riavviando, attendi...',
+                style: TextStyle(fontSize: 20.0)),
             Container(
               padding: EdgeInsets.symmetric(vertical: 20.0),
               child: SizedBox(
@@ -68,7 +70,8 @@ class _RestartingServerDialogState extends State<RestartingServerDialog> {
                       ),
                     ),
                     CircularProgressIndicator(
-                      value: _secondsRemaining / FilmServerInterface.timeToRestart.inSeconds,
+                      value: _secondsRemaining /
+                          FilmServerInterface.timeToRestart.inSeconds,
                       strokeWidth: 7.0,
                     ),
                   ],

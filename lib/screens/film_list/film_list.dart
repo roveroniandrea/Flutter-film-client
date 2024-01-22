@@ -19,7 +19,8 @@ class FilmList extends StatefulWidget {
   _FilmListState createState() => _FilmListState();
 }
 
-class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin {
+class _FilmListState extends State<FilmList>
+    with SingleTickerProviderStateMixin {
   /// Elenco dei film con le varie cartelle
   FilmFolderClass? _films;
 
@@ -67,7 +68,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
 
     // Ascolto per cambi di connessione
     final Connectivity _connectivity = new Connectivity();
-    _streamSubscription = _connectivity.onConnectivityChanged.listen((connectivityResult) {
+    _streamSubscription =
+        _connectivity.onConnectivityChanged.listen((connectivityResult) {
       setState(() {
         _connectivityResult = connectivityResult;
       });
@@ -88,7 +90,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
       child: DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -97,7 +99,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
             controller: _tabController,
             children: [
               CustomProgress(
-                  hasError: _connectivityResult != ConnectivityResult.wifi || _loadingError != '',
+                  hasError: _connectivityResult != ConnectivityResult.wifi ||
+                      _loadingError != '',
                   loadingText: 'Recupero i film...',
                   isLoading: _loadingFilms,
                   errorChild: _buildErrorWidget(),
@@ -107,7 +110,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
           ),
         ),
       ),
-      onWillPop: _onBackPressed,
+      canPop: false,
+      onPopInvoked: _onBackPressed,
     );
   }
 
@@ -122,16 +126,16 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
             items: (['Film'] + _path)
                 .asMap()
                 .entries
-                .map((entry) =>
-                BreadCrumbItem(
-                    content: Text(entry.value, style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                .map((entry) => BreadCrumbItem(
+                    content: Text(entry.value,
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold)),
                     onTap: () => _handleBreacrumbTap(entry.key)))
                 .toList(),
-            divider: Icon(Icons.chevron_right, color: DynamicTheme
-                .of(context)
-                ?.convertTheme()
-                .primaryColor),
-            overflow: WrapOverflow(direction: Axis.horizontal, keepLastDivider: false),
+            divider: Icon(Icons.chevron_right,
+                color: DynamicTheme.of(context)?.convertTheme().primaryColor),
+            overflow: WrapOverflow(
+                direction: Axis.horizontal, keepLastDivider: false),
           ),
         ),
         Expanded(
@@ -178,7 +182,9 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
     });
 
     // Chiamata al server per i film
-    Future<FilmFolderClass> httpCall = requestReload ? FilmServerInterface.reloadFilmDirectory() : FilmServerInterface.getFilms();
+    Future<FilmFolderClass> httpCall = requestReload
+        ? FilmServerInterface.reloadFilmDirectory()
+        : FilmServerInterface.getFilms();
     httpCall.then((films) {
       setState(() {
         _loadingFilms = false;
@@ -213,13 +219,13 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   /// 2- Torno indietro di una cartella
   ///
   /// 3- Chiedo se voglio uscire dall'app
-  Future<bool> _onBackPressed() {
+  void _onBackPressed(bool _) async {
     if (_isSearching) {
       // Prima possibilità esco dalla ricerca film
       setState(() {
         _isSearching = false;
       });
-      return Future.value(false);
+      return;
     }
 
     if (_tabController.index > 0) {
@@ -227,7 +233,7 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
       setState(() {
         _tabController.animateTo(0);
       });
-      return Future.value(false);
+      return;
     }
 
     if (_path.length > 0) {
@@ -236,27 +242,33 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
         _path.removeLast();
         _isForward = false;
       });
-      return Future.value(false);
+      return;
     } else {
       // Quarta possibilità chiedo se voglio uscire dall'app
-      return showDialog<bool>(
-          builder: (context) => AlertDialog(
-            title: Text("Vuoi uscire dall'app?"),
-            actions: [
-              TextButton.icon(
-                icon: Icon(Icons.exit_to_app),
-                label: Text(
-                  'Sì',
-                ),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-              TextButton(
-                child: Text('No'),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-            ],
-          ), context: context,
-          barrierDismissible: false).then((value) => value ?? false);
+      await showDialog<bool>(
+              builder: (context) => AlertDialog(
+                    title: Text("Vuoi uscire dall'app?"),
+                    actions: [
+                      TextButton.icon(
+                        icon: Icon(Icons.exit_to_app),
+                        label: Text(
+                          'Sì',
+                        ),
+                        // If yes, exit the app
+                        onPressed: () => SystemNavigator.pop(),
+                      ),
+                      TextButton(
+                        child: Text('No'),
+                        // Otherwise just close the modal
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+              context: context,
+              barrierDismissible: false,
+              // See https://stackoverflow.com/questions/52450907/flutter-showdialog-with-navigator-pop
+              useRootNavigator: false)
+          .then((value) => value ?? false);
     }
   }
 
@@ -264,7 +276,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   void _handleFilmTap(FilmClass film) {
     final String fullPath = '${_path.join('/')}/${film.title}';
     // Nuova rotta ad InspectFilm
-    Navigator.pushNamed(context, InspectFilmArgument.routeName, arguments: InspectFilmArgument(film: film, fullPath: fullPath));
+    Navigator.pushNamed(context, InspectFilmArgument.routeName,
+        arguments: InspectFilmArgument(film: film, fullPath: fullPath));
   }
 
   /// Gestisce il clic su una cartella
@@ -289,24 +302,30 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   /// Crea il widget per l'errore di connessione
   Widget _buildErrorWidget() {
     return Container(
-        width: MediaQuery
-            .of(context)
-            .size
-            .width,
+        width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.only(top: 100.0),
         child: Column(
           children: [
             Text(
-              _connectivityResult != ConnectivityResult.wifi ? 'Non sei connesso al Wi-Fi' : 'Il server è spento',
-              style: TextStyle(color: DynamicTheme
-                  .of(context)
-                  ?.convertTheme()
-                  .colorScheme.error, fontSize: 20.0, fontWeight: FontWeight.bold),
+              _connectivityResult != ConnectivityResult.wifi
+                  ? 'Non sei connesso al Wi-Fi'
+                  : 'Il server è spento',
+              style: TextStyle(
+                  color: DynamicTheme.of(context)
+                      ?.convertTheme()
+                      .colorScheme
+                      .error,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
               padding: EdgeInsets.only(top: 30.0),
-              child: Icon(_connectivityResult != ConnectivityResult.wifi ? Icons.wifi_off : Icons.cloud_off, size: 100.0),
+              child: Icon(
+                  _connectivityResult != ConnectivityResult.wifi
+                      ? Icons.wifi_off
+                      : Icons.cloud_off,
+                  size: 100.0),
             )
           ],
         ));
@@ -320,21 +339,23 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
     FilmServerInterface.checkForUpdates().then((updateAvailable) {
       if (updateAvailable) {
         Future<bool> updateDialog = showDialog<bool>(
-            builder: (context) => AlertDialog(
-              title: Text("E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
-              actions: [
-                TextButton.icon(
-                  icon: Icon(Icons.get_app),
-                  label: Text('Sì'),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-                TextButton(
-                  child: Text('No'),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-              ],
-            ), context: context,
-            barrierDismissible: false)
+                builder: (context) => AlertDialog(
+                      title: Text(
+                          "E' disponibile un nuovo aggiornamento dell'app. Vuoi scaricarlo?"),
+                      actions: [
+                        TextButton.icon(
+                          icon: Icon(Icons.get_app),
+                          label: Text('Sì'),
+                          onPressed: () => Navigator.of(context).pop(true),
+                        ),
+                        TextButton(
+                          child: Text('No'),
+                          onPressed: () => Navigator.of(context).pop(false),
+                        ),
+                      ],
+                    ),
+                context: context,
+                barrierDismissible: false)
             .then((value) => value ?? false);
 
         updateDialog.then((updateYN) {
@@ -385,7 +406,8 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
           ),
           IconButton(
             icon: Icon(Icons.settings),
-            onPressed: () => Navigator.pushNamed(context, OptionsScreen.routeName),
+            onPressed: () =>
+                Navigator.pushNamed(context, OptionsScreen.routeName),
             tooltip: "Vai alle opzioni",
           )
         ],
@@ -404,19 +426,20 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
           decoration: InputDecoration(
               hintText: "Cerca un film",
               border: InputBorder.none,
-              hintStyle: TextStyle(color: DynamicTheme
-                  .of(context)
+              hintStyle: TextStyle(
+                  color: DynamicTheme.of(context)
+                      ?.convertTheme()
+                      .primaryTextTheme
+                      .bodySmall
+                      ?.color)),
+          autofocus: true,
+          style: TextStyle(
+              fontSize: 20.0,
+              color: DynamicTheme.of(context)
                   ?.convertTheme()
                   .primaryTextTheme
-                  .bodySmall
-                  ?.color)),
-          autofocus: true,
-          style: TextStyle(fontSize: 20.0, color: DynamicTheme
-              .of(context)
-              ?.convertTheme()
-              .primaryTextTheme
-              .bodyLarge
-              ?.color),
+                  .bodyLarge
+                  ?.color),
           onChanged: (value) {
             setState(() {
               _searchPattern = value;
@@ -432,27 +455,30 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   List<Widget> _buildListTiles() {
     FilmFolderClass? subtree = _films;
     _path.forEach((p) =>
-    subtree = subtree?.folders.firstWhere((folder) => folder.path == p));
+        subtree = subtree?.folders.firstWhere((folder) => folder.path == p));
 
     final tiles = _mapFolders(subtree)
         ?.map<Widget>((folder) {
-      return ListTile(
-        title: Text(folder.path),
-        leading: Icon(Icons.folder),
-        onTap: () => _handleFolderTap(folder),
-        visualDensity: VisualDensity.comfortable,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      );
-    })
-        .followedBy((_mapFilms(subtree)?? []).map<Widget>((film) {
-      return ListTile(
-        title: Text(film.title),
-        leading: Icon(Icons.movie, color: film.isSupported() ? Colors.green : Colors.red),
-        onTap: () => _handleFilmTap(film),
-        visualDensity: VisualDensity.comfortable,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      );
-    }))
+          return ListTile(
+            title: Text(folder.path),
+            leading: Icon(Icons.folder),
+            onTap: () => _handleFolderTap(folder),
+            visualDensity: VisualDensity.comfortable,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          );
+        })
+        .followedBy((_mapFilms(subtree) ?? []).map<Widget>((film) {
+          return ListTile(
+            title: Text(film.title),
+            leading: Icon(Icons.movie,
+                color: film.isSupported() ? Colors.green : Colors.red),
+            onTap: () => _handleFilmTap(film),
+            visualDensity: VisualDensity.comfortable,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          );
+        }))
         .expand((element) => [element, Divider()])
         .toList();
 
@@ -464,7 +490,9 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
           padding: EdgeInsets.only(top: 50),
           alignment: Alignment.center,
           child: Text(
-            _isSearching ? "Nessun film in questa cartella soddisfa la ricerca" : "Questa cartella è vuota",
+            _isSearching
+                ? "Nessun film in questa cartella soddisfa la ricerca"
+                : "Questa cartella è vuota",
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -476,7 +504,9 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   /// Ritorna le sottocartelle da visulizzare nel caso stia effettuando una ricerca
   List<FilmFolderClass>? _mapFolders(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
-      return subtree?.folders.where((folder) => folder.matchesPattern(_searchPattern)).toList();
+      return subtree?.folders
+          .where((folder) => folder.matchesPattern(_searchPattern))
+          .toList();
     } else {
       return subtree?.folders;
     }
@@ -485,7 +515,9 @@ class _FilmListState extends State<FilmList> with SingleTickerProviderStateMixin
   /// Ritorna i film da visulizzare nel caso stia effettuando una ricerca
   List<FilmClass>? _mapFilms(FilmFolderClass? subtree) {
     if (_isSearching && _searchPattern != '') {
-      return subtree?.films.where((film) => film.matchesPattern(_searchPattern)).toList();
+      return subtree?.films
+          .where((film) => film.matchesPattern(_searchPattern))
+          .toList();
     } else {
       return subtree?.films;
     }

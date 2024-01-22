@@ -156,10 +156,11 @@ class FilmServerInterface {
   ///
   /// In caso di errore ritorna una [Exception]
   static void openDownloadLink() async {
-    if (await canLaunch('$_url/getApp')) {
-      await launch('$_url/getApp');
+    String url = '$_url/getApp';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
     } else {
-      throw new Exception('Could not launch $_url/getApp');
+      throw new Exception('Could not launch $url');
     }
   }
 

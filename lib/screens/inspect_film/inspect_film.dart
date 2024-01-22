@@ -38,7 +38,8 @@ class _InspectFilmState extends State<InspectFilm> {
     // Non posso modificare lo stato direttamente in initState
     Future.delayed(Duration.zero, () {
       setState(() {
-        final InspectFilmArgument arg = ModalRoute.of(context)?.settings.arguments as InspectFilmArgument;
+        final InspectFilmArgument arg =
+            ModalRoute.of(context)?.settings.arguments as InspectFilmArgument;
         _film = arg.film;
         _fullPath = arg.fullPath;
       });
@@ -107,7 +108,9 @@ class _InspectFilmState extends State<InspectFilm> {
             [
               CustomProgress(
                 isLoading: _transmittingOnChromecast || _searchingChromecasts,
-                loadingText: _transmittingOnChromecast ? 'Trasmissione in corso...' : 'Recupero i Chromecast...',
+                loadingText: _transmittingOnChromecast
+                    ? 'Trasmissione in corso...'
+                    : 'Recupero i Chromecast...',
                 hasError: !(_film?.isSupported() ?? false),
                 child: Column(children: [
                   Column(
@@ -142,8 +145,13 @@ class _InspectFilmState extends State<InspectFilm> {
                   padding: EdgeInsets.only(top: 100.0),
                   child: Text(
                     'Impossibile trasmettere il film:\n\n${_film?.notSupportedReason() ?? ''}',
-                    style:
-                        TextStyle(color: DynamicTheme.of(context)?.convertTheme().colorScheme.error, fontSize: 20.0, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: DynamicTheme.of(context)
+                            ?.convertTheme()
+                            .colorScheme
+                            .error,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -173,7 +181,9 @@ class _InspectFilmState extends State<InspectFilm> {
 
   /// Passa alla rotta per guardare il film sul telefono
   void _handleGuardaSuTelefono() {
-    Navigator.pushNamed(context, CastLocalArgument.routeName, arguments: CastLocalArgument(film: _film as FilmClass, fullPath: _fullPath));
+    Navigator.pushNamed(context, CastLocalArgument.routeName,
+        arguments:
+            CastLocalArgument(film: _film as FilmClass, fullPath: _fullPath));
   }
 
   /// Inizia la trasmissione su un chromecast
@@ -191,30 +201,38 @@ class _InspectFilmState extends State<InspectFilm> {
       });
       // Se il server non è in fase di riavvio mostro lo snackbar
       if (castResult != CastResult.Restarting) {
-        /*
-        FIXME: Compile error
-        Scaffold.of(_scaffoldContext as BuildContext).showSnackBar(SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Container(
-              child: Row(
-                children: [
-                  Padding(
-                      padding: const EdgeInsets.only(right: 20),
-                      child: Icon(castResult == CastResult.Done ? Icons.thumb_up : Icons.thumb_down,
-                          color: castResult == CastResult.Done
-                              ? DynamicTheme.of(context)?.convertTheme().iconTheme.color
-                              : DynamicTheme.of(context)?.convertTheme().colorScheme.error)),
-                  Text(
-                    castResult == CastResult.Done ? 'Trasmissione avvenuta!' : 'Errore in trasmissione',
-                    style: TextStyle(fontSize: 20.0),
+        ScaffoldMessenger.of(_scaffoldContext as BuildContext)
+            .showSnackBar(SnackBar(
+                behavior: SnackBarBehavior.floating,
+                content: Container(
+                  child: Row(
+                    children: [
+                      Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: Icon(
+                              castResult == CastResult.Done
+                                  ? Icons.thumb_up
+                                  : Icons.thumb_down,
+                              color: castResult == CastResult.Done
+                                  ? DynamicTheme.of(context)
+                                      ?.convertTheme()
+                                      .iconTheme
+                                      .color
+                                  : DynamicTheme.of(context)
+                                      ?.convertTheme()
+                                      .colorScheme
+                                      .error)),
+                      Text(
+                        castResult == CastResult.Done
+                            ? 'Trasmissione avvenuta!'
+                            : 'Errore in trasmissione',
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              padding: EdgeInsets.all(6.0),
-            ),
-            duration: Duration(seconds: 3)));
-
-            */
+                  padding: EdgeInsets.all(6.0),
+                ),
+                duration: Duration(seconds: 3)));
       } else {
         showDialog(
             context: context,
