@@ -71,25 +71,27 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
           hasError: false,
           isLoading: !_aspectRatioAvailable,
           loadingText: 'Connessione al server...',
-          child: Chewie(
-            controller: ChewieController(
-                allowFullScreen: true,
-                allowMuting: true,
-                aspectRatio: _controller?.value.aspectRatio,
-                autoInitialize: true,
-                deviceOrientationsAfterFullScreen: [
-                  DeviceOrientation.portraitUp
-                ],
-                fullScreenByDefault: false,
-                looping: false,
-                showControls: true,
-                startAt: Duration.zero,
-                autoPlay: true,
-                draggableProgressBar: true,
-                allowedScreenSleep: false,
-                zoomAndPan: true,
-                videoPlayerController: _controller as VideoPlayerController),
-          ),
+          child: _controller != null
+              ? Chewie(
+                  controller: ChewieController(
+                      allowFullScreen: true,
+                      allowMuting: true,
+                      aspectRatio: _controller?.value.aspectRatio,
+                      autoInitialize: true,
+                      deviceOrientationsAfterFullScreen: [
+                        DeviceOrientation.portraitUp
+                      ],
+                      fullScreenByDefault: false,
+                      looping: false,
+                      showControls: true,
+                      startAt: Duration.zero,
+                      autoPlay: true,
+                      draggableProgressBar: true,
+                      allowedScreenSleep: false,
+                      zoomAndPan: true,
+                      videoPlayerController:
+                          _controller as VideoPlayerController))
+              : SizedBox.shrink(),
         ));
   }
 }
