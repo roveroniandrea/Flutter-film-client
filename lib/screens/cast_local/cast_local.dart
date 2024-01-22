@@ -40,7 +40,8 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
       final filmUrlOnServer = FilmServerInterface.getFilmUrl(arg.fullPath);
       setState(() {
         // Imposto il controller
-        _controller = VideoPlayerController.networkUrl(Uri.parse(filmUrlOnServer));
+        _controller =
+            VideoPlayerController.networkUrl(Uri.parse(filmUrlOnServer));
         _controller?.initialize().then((value) {
           setState(() {
             // Quando il controller ha recuperato l'aspect ratio del film cambio lo stato
@@ -67,12 +68,7 @@ class _CastLocalScreenState extends State<CastLocalScreen> {
           title: Text(_film?.humanTitle ?? ''),
         ),
         body: CustomProgress(
-          errorChild: Text(
-            'Errore non specificato',
-            style: TextStyle(
-                color:
-                    DynamicTheme.of(context)?.convertTheme().colorScheme.error),
-          ),
+          errorChild: Text('Errore non specificato'),
           hasError: false,
           isLoading: !_aspectRatioAvailable,
           loadingText: 'Connessione al server...',

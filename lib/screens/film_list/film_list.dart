@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:animations/animations.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:film_client/components/custom_progress.dart';
@@ -185,6 +186,7 @@ class _FilmListState extends State<FilmList>
     Future<FilmFolderClass> httpCall = requestReload
         ? FilmServerInterface.reloadFilmDirectory()
         : FilmServerInterface.getFilms();
+
     httpCall.then((films) {
       setState(() {
         _loadingFilms = false;
@@ -310,13 +312,7 @@ class _FilmListState extends State<FilmList>
               _connectivityResult != ConnectivityResult.wifi
                   ? 'Non sei connesso al Wi-Fi'
                   : 'Il server è spento',
-              style: TextStyle(
-                  color: DynamicTheme.of(context)
-                      ?.convertTheme()
-                      .colorScheme
-                      .error,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             Container(
@@ -424,22 +420,9 @@ class _FilmListState extends State<FilmList>
         ),
         title: TextField(
           decoration: InputDecoration(
-              hintText: "Cerca un film",
-              border: InputBorder.none,
-              hintStyle: TextStyle(
-                  color: DynamicTheme.of(context)
-                      ?.convertTheme()
-                      .primaryTextTheme
-                      .bodySmall
-                      ?.color)),
+              hintText: "Cerca un film", border: InputBorder.none),
           autofocus: true,
-          style: TextStyle(
-              fontSize: 20.0,
-              color: DynamicTheme.of(context)
-                  ?.convertTheme()
-                  .primaryTextTheme
-                  .bodyLarge
-                  ?.color),
+          style: TextStyle(fontSize: 20.0),
           onChanged: (value) {
             setState(() {
               _searchPattern = value;

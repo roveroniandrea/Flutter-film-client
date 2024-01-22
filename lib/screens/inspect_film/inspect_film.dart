@@ -146,10 +146,6 @@ class _InspectFilmState extends State<InspectFilm> {
                   child: Text(
                     'Impossibile trasmettere il film:\n\n${_film?.notSupportedReason() ?? ''}',
                     style: TextStyle(
-                        color: DynamicTheme.of(context)
-                            ?.convertTheme()
-                            .colorScheme
-                            .error,
                         fontSize: 20.0,
                         fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
